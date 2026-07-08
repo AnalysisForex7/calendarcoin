@@ -77,10 +77,15 @@
             background: #f5f5f5;
             padding: 10px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 12px;
             word-break: break-all;
             margin: 8px 0;
             color: #555;
+        }
+        .referral-status {
+            font-size: 12px;
+            color: #FF9800;
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -109,8 +114,9 @@
     <div class="referral-box">
         <div class="label">👥 Referrals</div>
         <div class="count" id="referralCount">0</div>
-        <div class="reward-info">Rp 1 per referral</div>
-        <div class="referral-link" id="referralLink">Loading referral link...</div>
+        <div class="reward-info">1 TON per valid referral</div>
+        <div class="referral-status" id="referralStatus">⏳ Referral counted after 3 daily claims</div>
+        <div class="referral-link" id="referralLink">Loading...</div>
         <button class="btn btn-referral" id="tombolReferral">📤 Share Referral Link</button>
     </div>
 
@@ -119,6 +125,12 @@
 </div>
 
 <script>
+    // ========== TELEGRAM WEB APP ==========
+    var tg = window.Telegram?.WebApp || {};
+    var user = tg.initDataUnsafe?.user || {};
+    var userId = user.id || 'guest';
+    var userFirstName = user.first_name || 'User';
+
     // ========== DATA ==========
     var today = new Date();
     var tgl = today.getDate();
@@ -128,13 +140,63 @@
     var saldo = 0;
     var reward = 0.0005;
     var minWd = 1;
-    var referralReward = 0.000000035; // ≈ Rp 1 (1 TON ≈ Rp 28.000)
+    var referralReward = 0.000000035; // 1 TON ≈ Rp 28.000 → Rp 1
     var referralCount = 0;
 
-    // Ambil data dari Telegram Web App
-    var tg = window.Telegram?.WebApp || {};
-    var user = tg.initDataUnsafe?.user || {};
-    var userId = user.id || 'guest';
+    // Simulasi data referral (di backend pakai database)
+    var referralData = {
+        // userId: { count: 0, claimDays: 0, lastClaim: '' }
+    };
+
+    // ========== FUNGSI ==========
+
+    // Generate referral link dengan user ID beneran
+    function getReferralLink() {
+        if (userId === 'guest') {
+            return 'https://t.me/CalendarCoinBot/rewards?start=guest';
+        }
+        return 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
+    }
+
+    // Cek apakah user ini valid (sudah claim 3 hari)
+    function isReferralValid(userId) {
+        var data = referralData[userId];
+        if (!data) return false;
+        return data.claimDays >= 3;
+    }
+
+    // Update tampilan referral
+    function updateReferralUI() {
+        var link = getReferralLink();
+        document.getElementById('referralLink').textContent = link;
+
+        // Hitung referral yang valid (claim >= 3 hari)
+        var validCount = 0;
+        for (var key in referralData) {
+            if (referralData[key].claimDays >= 3) {
+                validCount++;
+            }
+        }
+        // Tambahkan referral yang sudah dihitung
+        referralCount = validCount;
+        document.getElementById('referralCount').textContent = referralCount;
+
+        // Status validasi
+        var statusText = document.getElementById('referralStatus');
+        if (userId !== 'guest') {
+            var myData = referralData[userId];
+            if (myData) {
+                var daysLeft = 3 - myData.claimDays;
+                if (daysLeft <= 0) {
+                    statusText.textContent = '✅ Your referrals are valid!';
+                } else {
+                    statusText.textContent = '⏳ Need ' + daysLeft + ' more daily claim(s) to validate referrals';
+                }
+            } else {
+                statusText.textContent = '⏳ Claim daily for 3 days to validate referrals';
+            }
+        }
+    }
 
     // ========== RENDER KALENDER ==========
     function buatKalender() {
@@ -170,9 +232,6 @@
         var usd = saldo * 1.65;
         document.getElementById('saldoUsd').textContent = usd.toFixed(3);
 
-        // Referral
-        document.getElementById('referralCount').textContent = referralCount;
-
         // Status Claim
         var status = document.getElementById('status');
         var tombol = document.getElementById('tombolAmbil');
@@ -197,16 +256,36 @@
             btnWd.textContent = '💳 Withdraw (Min. 1 TON)';
         }
 
-        // Referral Link
-        var link = 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
-        document.getElementById('referralLink').textContent = link;
+        // Referral
+        updateReferralUI();
+    }
+
+    // ========== CLAIM ==========
+    function doClaim() {
+        // Tambah saldo
+        saldo = saldo + reward;
+
+        // Update data referral (simulasi)
+        if (userId !== 'guest') {
+            if (!referralData[userId]) {
+                referralData[userId] = { count: 0, claimDays: 0, lastClaim: '' };
+            }
+            var todayStr = today.toISOString().split('T')[0];
+            if (referralData[userId].lastClaim !== todayStr) {
+                referralData[userId].claimDays = referralData[userId].claimDays + 1;
+                referralData[userId].lastClaim = todayStr;
+                // Update poin referral
+                referralData[userId].count = referralData[userId].count + 1;
+            }
+        }
+
+        updateUI();
+        alert('🎉 +0.0005 TON!');
     }
 
     // ========== EVENT ==========
     document.getElementById('tombolAmbil').addEventListener('click', function() {
-        saldo = saldo + reward;
-        updateUI();
-        alert('🎉 +0.0005 TON!');
+        doClaim();
     });
 
     document.getElementById('tombolWd').addEventListener('click', function() {
@@ -218,7 +297,7 @@
     });
 
     document.getElementById('tombolReferral').addEventListener('click', function() {
-        var link = 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
+        var link = getReferralLink();
         if (navigator.share) {
             navigator.share({
                 title: 'Calendar Coin',
@@ -232,11 +311,6 @@
                 prompt('Copy this link:', link);
             });
         }
-        // Simulasi referral
-        referralCount = referralCount + 1;
-        saldo = saldo + referralReward;
-        updateUI();
-        alert('🎉 +Rp 1 from referral!');
     });
 
     // ========== INIT ==========
@@ -244,6 +318,7 @@
     updateUI();
 
     console.log('✅ Calendar Coin ready! User ID:', userId);
+    console.log('User:', userFirstName);
 </script>
 
 </body>

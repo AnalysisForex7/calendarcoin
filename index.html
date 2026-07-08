@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Coin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #FFF8E7;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .box {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #5D4037; font-size: 28px; }
+        .date { font-size: 18px; color: #888; margin-bottom: 10px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            background: #f0ebe6;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .grid .n { font-size: 12px; font-weight: bold; color: #999; padding: 4px; }
+        .grid .d { padding: 8px; border-radius: 50%; font-size: 14px; }
+        .grid .d.today { background: #4CAF50; color: white; font-weight: bold; }
+        .grid .d.done { background: #C8E6C9; color: #2E7D32; }
+        .grid .d.empty { visibility: hidden; }
+        .status { font-size: 16px; color: #FF9800; margin: 10px 0; }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-claim { background: #4CAF50; color: white; }
+        .btn-claim:disabled { background: #ccc; }
+        .btn-withdraw { background: #FF9800; color: white; }
+        .btn-withdraw:disabled { background: #ccc; }
+        .saldo {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .saldo .label { color: #999; font-size: 13px; }
+        .saldo .jumlah { font-size: 32px; font-weight: bold; color: #222; }
+        .saldo .jumlah .ton { font-size: 18px; color: #0088CC; }
+        .saldo .rupiah { font-size: 14px; color: #999; }
+        .info { font-size: 12px; color: #bbb; }
+        .info b { color: #8D6E63; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+
+    <h1>📅 Calendar Coin</h1>
+    <div class="date" id="tgl">Loading...</div>
+
+    <div class="grid" id="kalender"></div>
+
+    <div class="status" id="status">✨ Hari ini: Belum ambil koin</div>
+
+    <button class="btn btn-claim" id="tombolAmbil">🪙 Ambil Koin Hari Ini</button>
+
+    <div class="saldo">
+        <div class="label">Total Koin</div>
+        <div class="jumlah">
+            <span id="saldoTon">0.000</span> <span class="ton">TON</span>
+        </div>
+        <div class="rupiah">≈ Rp <span id="saldoRupiah">0</span></div>
+    </div>
+
+    <button class="btn btn-withdraw" id="tombolWd">💳 Withdraw (Min. 1 TON)</button>
+
+    <div class="info">
+        <b>1 iklan = 0.0005 TON</b> (≈ Rp 14) &bull; 2.000 iklan = 1 TON
+    </div>
+
+</div>
+
+<script>
+    var today = new Date();
+    var tgl = today.getDate();
+    var bulan = today.getMonth();
+    var tahun = today.getFullYear();
+
+    var saldo = 0;
+    var reward = 0.0005;
+    var minWd = 1;
+
+    function buatKalender() {
+        var hari = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+        var hariPertama = new Date(tahun, bulan, 1).getDay();
+        var totalHari = new Date(tahun, bulan+1, 0).getDate();
+
+        var html = '';
+        for (var i = 0; i < 7; i++) {
+            html += '<div class="n">'+hari[i]+'</div>';
+        }
+        for (var i = 0; i < hariPertama; i++) {
+            html += '<div class="d empty"></div>';
+        }
+        for (var d = 1; d <= totalHari; d++) {
+            var cls = 'd';
+            if (d === tgl) cls += ' today';
+            if (d < tgl && d <= 5) cls += ' done';
+            if (d > tgl) cls += ' empty';
+            html += '<div class="'+cls+'">'+d+'</div>';
+        }
+        document.getElementById('kalender').innerHTML = html;
+
+        var opt = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+        document.getElementById('tgl').textContent = today.toLocaleDateString('id-ID', opt);
+    }
+
+    function updateUI() {
+        document.getElementById('saldoTon').textContent = saldo.toFixed(3);
+        document.getElementById('saldoRupiah').textContent = (saldo * 28000).toLocaleString('id-ID');
+
+        var status = document.getElementById('status');
+        var tombol = document.getElementById('tombolAmbil');
+
+        var sudahClaim = false;
+        if (sudahClaim) {
+            status.textContent = '✅ Hari ini: Sudah ambil koin!';
+            tombol.disabled = true;
+            tombol.textContent = '✅ Koin hari ini sudah diambil';
+        } else {
+            status.textContent = '✨ Hari ini: Belum ambil koin';
+            tombol.disabled = false;
+            tombol.textContent = '🪙 Ambil Koin Hari Ini';
+        }
+
+        var btnWd = document.getElementById('tombolWd');
+        if (saldo >= minWd) {
+            btnWd.disabled = false;
+            btnWd.textContent = '💳 Withdraw Sekarang';
+        } else {
+            btnWd.disabled = true;
+            btnWd.textContent = '💳 Withdraw (Min. 1 TON)';
+        }
+    }
+
+    document.getElementById('tombolAmbil').addEventListener('click', function() {
+        saldo = saldo + reward;
+        updateUI();
+        alert('🎉 +0.0005 TON!');
+    });
+
+    document.getElementById('tombolWd').addEventListener('click', function() {
+        if (saldo < minWd) {
+            alert('⚠️ Saldo belum cukup! Minimal 1 TON.');
+            return;
+        }
+        alert('💳 Proses withdraw ke dompet TON...');
+    });
+
+    buatKalender();
+    updateUI();
+</script>
+
+</body>
+</html>

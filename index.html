@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background: #0D1117;
             display: flex;
             justify-content: center;
@@ -23,59 +22,38 @@
             border-radius: 28px;
             padding: 24px 20px 28px;
             border: 1px solid #30363D;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            text-align: center;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header h1 { font-size: 20px; font-weight: 600; color: #F0F6FC; letter-spacing: -0.3px; }
-        .header .badge { background: #238636; color: #fff; font-size: 10px; font-weight: 600; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .date { font-size: 14px; color: #8B949E; margin-bottom: 18px; font-weight: 400; }
-        .calendar {
+        h1 { color: #F0F6FC; font-size: 24px; margin-bottom: 4px; }
+        .date { color: #8B949E; font-size: 14px; margin-bottom: 20px; }
+        .grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
+            gap: 4px;
             background: #0D1117;
-            padding: 8px;
+            padding: 10px;
             border-radius: 16px;
             margin-bottom: 20px;
         }
-        .calendar .day-name { font-size: 11px; font-weight: 600; color: #8B949E; text-align: center; padding: 6px 0; text-transform: uppercase; letter-spacing: 0.3px; }
-        .calendar .day {
-            aspect-ratio: 1/1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 500;
-            color: #C9D1D9;
-            border-radius: 50%;
-            transition: 0.15s;
-        }
-        .calendar .day.today { background: #238636; color: #fff; font-weight: 600; box-shadow: 0 0 0 2px #238636; }
-        .calendar .day.done { color: #8B949E; opacity: 0.4; }
-        .calendar .day.empty { visibility: hidden; }
-        .status { font-size: 14px; color: #F0883E; text-align: center; margin-bottom: 14px; font-weight: 450; }
+        .grid .n { color: #8B949E; font-size: 12px; font-weight: bold; padding: 4px; }
+        .grid .d { padding: 8px; border-radius: 50%; font-size: 14px; color: #C9D1D9; }
+        .grid .d.today { background: #238636; color: #fff; font-weight: bold; }
+        .grid .d.empty { visibility: hidden; }
+        .status { color: #F0883E; font-size: 14px; margin-bottom: 14px; }
         .btn {
             width: 100%;
             padding: 14px;
             border: none;
             border-radius: 50px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: 0.15s;
             margin-bottom: 10px;
         }
-        .btn:active { transform: scale(0.97); }
+        .btn:active { transform: scale(0.96); }
         .btn-claim { background: #238636; color: #fff; }
-        .btn-claim:hover { background: #2EA043; }
         .btn-claim:disabled { background: #21262D; color: #484F58; cursor: not-allowed; }
         .btn-withdraw { background: #1F6FEB; color: #fff; }
-        .btn-withdraw:hover { background: #388BFD; }
         .btn-withdraw:disabled { background: #21262D; color: #484F58; cursor: not-allowed; }
         .balance {
             background: #0D1117;
@@ -84,38 +62,21 @@
             margin: 14px 0 12px;
             border: 1px solid #21262D;
         }
-        .balance .label { font-size: 12px; color: #8B949E; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
-        .balance .amount { font-size: 32px; font-weight: 700; color: #F0F6FC; margin-top: 2px; }
-        .balance .amount .ton { font-size: 16px; font-weight: 500; color: #8B949E; }
-        .balance .usd { font-size: 14px; color: #8B949E; margin-top: 2px; }
-        .footer { font-size: 11px; color: #484F58; text-align: center; margin-top: 14px; }
-        .referral-box {
-            background: #0D1117;
-            border-radius: 16px;
-            padding: 14px;
-            margin: 14px 0 12px;
-            border: 1px solid #21262D;
-        }
-        .referral-box .label { font-size: 12px; color: #8B949E; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
-        .referral-box .count { font-size: 24px; font-weight: 700; color: #F0F6FC; }
-        .referral-box .link { font-size: 11px; color: #58A6FF; word-break: break-all; margin: 6px 0; background: #161B22; padding: 6px 10px; border-radius: 8px; }
-        .referral-box .status-text { font-size: 11px; color: #8B949E; margin-top: 4px; }
-        .btn-referral { background: #1F6FEB; color: #fff; font-size: 14px; padding: 12px; }
-        .btn-referral:hover { background: #388BFD; }
+        .balance .label { color: #8B949E; font-size: 12px; text-transform: uppercase; }
+        .balance .amount { font-size: 32px; font-weight: bold; color: #F0F6FC; }
+        .balance .amount .ton { font-size: 16px; color: #8B949E; }
+        .balance .usd { color: #8B949E; font-size: 14px; }
+        .footer { color: #484F58; font-size: 11px; margin-top: 14px; }
     </style>
 </head>
 <body>
 
 <div class="card">
 
-    <div class="header">
-        <h1>📅 Calendar</h1>
-        <span class="badge">TON</span>
-    </div>
-
+    <h1>📅 Calendar</h1>
     <div class="date" id="tgl">Loading...</div>
 
-    <div class="calendar" id="kalender"></div>
+    <div class="grid" id="kalender"></div>
 
     <div class="status" id="status">✨ Not claimed today</div>
 
@@ -129,38 +90,13 @@
         <div class="usd">$<span id="saldoUsd">0.000</span></div>
     </div>
 
-    <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw</button>
-
-    <!-- REFERRAL -->
-    <div class="referral-box">
-        <div class="label">👥 Referrals</div>
-        <div class="count" id="referralCount">0</div>
-        <div class="status-text" id="referralStatus">⏳ Need 3 daily claims & username</div>
-        <div class="link" id="referralLink">Loading...</div>
-        <button class="btn btn-referral" id="btnReferral">📤 Share Link</button>
-    </div>
+    <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw (1 TON min)</button>
 
     <div class="footer">Min. 1 TON · Secure · Fast</div>
 
 </div>
 
 <script>
-    // ===== TELEGRAM =====
-    var tg = window.Telegram?.WebApp || {};
-    var user = tg.initDataUnsafe?.user || {};
-    var userId = user.id || null;
-    var username = user.username || null;
-
-    // ===== DEVICE FINGERPRINT =====
-    function getDeviceId() {
-        var screen = screen.width + 'x' + screen.height;
-        var ua = navigator.userAgent;
-        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        var lang = navigator.language || 'en-US';
-        return screen + '|' + ua + '|' + tz + '|' + lang;
-    }
-    var deviceId = getDeviceId();
-
     // ===== DATA =====
     var today = new Date();
     var tgl = today.getDate();
@@ -171,85 +107,6 @@
     var saldo = parseFloat(localStorage.getItem('saldo')) || 0;
     var lastClaim = localStorage.getItem('lastClaim') || '';
     var alreadyClaimed = (lastClaim === todayStr);
-    var referralData = JSON.parse(localStorage.getItem('referralData')) || {};
-    var userReferrals = referralData[userId] || { count: 0, list: {} };
-
-    // ===== FUNGSI REFERRAL =====
-    function isValidReferral(refUserId) {
-        var refData = userReferrals.list[refUserId];
-        if (!refData) return false;
-        if (!refData.username) return false;
-        if (refData.claimDays < 3) return false;
-        if (refData.deviceId === deviceId) return false;
-        return true;
-    }
-
-    function countValidReferrals() {
-        var count = 0;
-        for (var key in userReferrals.list) {
-            if (isValidReferral(key)) count++;
-        }
-        userReferrals.count = count;
-        referralData[userId] = userReferrals;
-        localStorage.setItem('referralData', JSON.stringify(referralData));
-        return count;
-    }
-
-    function addReferral(refUserId, refUsername, refDeviceId) {
-        if (userReferrals.list[refUserId]) return;
-        if (refDeviceId === deviceId) return;
-        for (var key in userReferrals.list) {
-            if (userReferrals.list[key].deviceId === refDeviceId) return;
-        }
-        userReferrals.list[refUserId] = {
-            username: refUsername,
-            deviceId: refDeviceId,
-            claimDays: 0,
-            firstClaim: todayStr,
-            lastClaim: '',
-            isValid: false
-        };
-        referralData[userId] = userReferrals;
-        localStorage.setItem('referralData', JSON.stringify(referralData));
-    }
-
-    function updateReferralClaim(uid) {
-        for (var refKey in referralData) {
-            var refList = referralData[refKey].list;
-            if (refList[uid]) {
-                var refData = refList[uid];
-                if (refData.lastClaim !== todayStr) {
-                    refData.claimDays++;
-                    refData.lastClaim = todayStr;
-                    refData.isValid = isValidReferral(uid);
-                    if (refData.isValid) {
-                        var bonus = parseFloat(localStorage.getItem('saldo')) || 0;
-                        bonus += 0.0005;
-                        localStorage.setItem('saldo', bonus);
-                    }
-                    localStorage.setItem('referralData', JSON.stringify(referralData));
-                }
-                break;
-            }
-        }
-    }
-
-    function getReferralLink() {
-        if (!userId) return 'https://t.me/CalendarCoinBot/rewards';
-        return 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
-    }
-
-    function handleReferralStart() {
-        var startParam = tg.initDataUnsafe?.start_param || null;
-        if (startParam && startParam !== userId && userId) {
-            var refUsername = user.username || 'unknown';
-            addReferral(startParam, refUsername, deviceId);
-            saldo += 0.0005;
-            localStorage.setItem('saldo', saldo);
-            updateUI();
-            alert('🎉 Welcome! +0.0005 TON bonus from referral!');
-        }
-    }
 
     // ===== KALENDER =====
     function renderCalendar() {
@@ -257,12 +114,11 @@
         var firstDay = new Date(tahun, bulan, 1).getDay();
         var totalDays = new Date(tahun, bulan+1, 0).getDate();
         var html = '';
-        for (var i = 0; i < 7; i++) html += '<div class="day-name">'+days[i]+'</div>';
-        for (var i = 0; i < firstDay; i++) html += '<div class="day empty"></div>';
+        for (var i = 0; i < 7; i++) html += '<div class="n">'+days[i]+'</div>';
+        for (var i = 0; i < firstDay; i++) html += '<div class="d empty"></div>';
         for (var d = 1; d <= totalDays; d++) {
-            var cls = 'day';
+            var cls = 'd';
             if (d === tgl) cls += ' today';
-            if (d < tgl) cls += ' done';
             html += '<div class="'+cls+'">'+d+'</div>';
         }
         document.getElementById('kalender').innerHTML = html;
@@ -274,8 +130,6 @@
     function updateUI() {
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
         document.getElementById('saldoUsd').textContent = (saldo * 1.65).toFixed(3);
-        document.getElementById('referralCount').textContent = countValidReferrals();
-        document.getElementById('referralLink').textContent = getReferralLink();
 
         var status = document.getElementById('status');
         var btn = document.getElementById('btnClaim');
@@ -297,25 +151,12 @@
             wd.disabled = true;
             wd.textContent = '💳 Withdraw (1 TON min)';
         }
-
-        var refStatus = document.getElementById('referralStatus');
-        if (!username) {
-            refStatus.textContent = '⚠️ Set Telegram username first!';
-            refStatus.style.color = '#F85149';
-        } else if (countValidReferrals() > 0) {
-            refStatus.textContent = '✅ ' + countValidReferrals() + ' valid referral(s)';
-            refStatus.style.color = '#3FB950';
-        } else {
-            refStatus.textContent = '⏳ Need 3 daily claims & username';
-            refStatus.style.color = '#8B949E';
-        }
     }
 
     // ===== SAVE =====
     function saveData() {
         localStorage.setItem('saldo', saldo);
         localStorage.setItem('lastClaim', lastClaim);
-        localStorage.setItem('referralData', JSON.stringify(referralData));
     }
 
     // ===== CLAIM =====
@@ -324,53 +165,30 @@
             alert('✅ Already claimed today! Come back tomorrow.');
             return;
         }
-        if (!username) {
-            alert('⚠️ Please set a Telegram username first!');
-            return;
-        }
-        var savedDevice = localStorage.getItem('deviceId');
-        if (savedDevice && savedDevice !== deviceId) {
-            alert('⚠️ This device is already registered!');
-            return;
-        }
-        localStorage.setItem('deviceId', deviceId);
-
         saldo += 0.0005;
         lastClaim = todayStr;
         alreadyClaimed = true;
-        updateReferralClaim(userId);
         saveData();
         updateUI();
-        alert('🎉 +0.0005 TON!');
+        alert('🎉 +0.0005 TON');
     }
 
-    // ===== SHARE =====
-    function shareReferral() {
-        var link = getReferralLink();
-        if (navigator.share) {
-            navigator.share({ title: 'Calendar Coin', text: 'Join me on Calendar Coin!', url: link });
-        } else {
-            navigator.clipboard.writeText(link).then(function() {
-                alert('✅ Referral link copied!');
-            }).catch(function() {
-                prompt('Copy this link:', link);
-            });
+    // ===== WITHDRAW =====
+    function doWithdraw() {
+        if (saldo < 1) {
+            alert('⚠️ Minimum 1 TON required');
+            return;
         }
+        alert('💳 Withdraw to wallet...');
     }
 
     // ===== EVENTS =====
     document.getElementById('btnClaim').onclick = doClaim;
-    document.getElementById('btnWithdraw').onclick = function() {
-        if (saldo < 1) { alert('⚠️ Minimum 1 TON required'); return; }
-        alert('💳 Withdraw to wallet...');
-    };
-    document.getElementById('btnReferral').onclick = shareReferral;
+    document.getElementById('btnWithdraw').onclick = doWithdraw;
 
     // ===== START =====
     renderCalendar();
-    handleReferralStart();
     updateUI();
-
     console.log('✅ Calendar Coin ready!');
 </script>
 

@@ -63,8 +63,6 @@
         .saldo .jumlah { font-size: 32px; font-weight: bold; color: #222; }
         .saldo .jumlah .ton { font-size: 18px; color: #0088CC; }
         .saldo .rupiah { font-size: 14px; color: #999; }
-        .info { font-size: 12px; color: #bbb; }
-        .info b { color: #8D6E63; }
     </style>
 </head>
 <body>
@@ -76,12 +74,12 @@
 
     <div class="grid" id="kalender"></div>
 
-    <div class="status" id="status">✨ Hari ini: Belum ambil koin</div>
+    <div class="status" id="status">✨ Today: Not claimed yet</div>
 
-    <button class="btn btn-claim" id="tombolAmbil">🪙 Ambil Koin Hari Ini</button>
+    <button class="btn btn-claim" id="tombolAmbil">🪙 Claim Today's Coin</button>
 
     <div class="saldo">
-        <div class="label">Total Koin</div>
+        <div class="label">Total Coins</div>
         <div class="jumlah">
             <span id="saldoTon">0.000</span> <span class="ton">TON</span>
         </div>
@@ -89,10 +87,6 @@
     </div>
 
     <button class="btn btn-withdraw" id="tombolWd">💳 Withdraw (Min. 1 TON)</button>
-
-    <div class="info">
-        <b>1 iklan = 0.0005 TON</b> (≈ Rp 14) &bull; 2.000 iklan = 1 TON
-    </div>
 
 </div>
 
@@ -107,7 +101,7 @@
     var minWd = 1;
 
     function buatKalender() {
-        var hari = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+        var hari = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         var hariPertama = new Date(tahun, bulan, 1).getDay();
         var totalHari = new Date(tahun, bulan+1, 0).getDate();
 
@@ -128,7 +122,7 @@
         document.getElementById('kalender').innerHTML = html;
 
         var opt = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-        document.getElementById('tgl').textContent = today.toLocaleDateString('id-ID', opt);
+        document.getElementById('tgl').textContent = today.toLocaleDateString('en-US', opt);
     }
 
     function updateUI() {
@@ -140,19 +134,19 @@
 
         var sudahClaim = false;
         if (sudahClaim) {
-            status.textContent = '✅ Hari ini: Sudah ambil koin!';
+            status.textContent = '✅ Today: Already claimed!';
             tombol.disabled = true;
-            tombol.textContent = '✅ Koin hari ini sudah diambil';
+            tombol.textContent = '✅ Already claimed today';
         } else {
-            status.textContent = '✨ Hari ini: Belum ambil koin';
+            status.textContent = '✨ Today: Not claimed yet';
             tombol.disabled = false;
-            tombol.textContent = '🪙 Ambil Koin Hari Ini';
+            tombol.textContent = '🪙 Claim Today\'s Coin';
         }
 
         var btnWd = document.getElementById('tombolWd');
         if (saldo >= minWd) {
             btnWd.disabled = false;
-            btnWd.textContent = '💳 Withdraw Sekarang';
+            btnWd.textContent = '💳 Withdraw Now';
         } else {
             btnWd.disabled = true;
             btnWd.textContent = '💳 Withdraw (Min. 1 TON)';
@@ -167,10 +161,10 @@
 
     document.getElementById('tombolWd').addEventListener('click', function() {
         if (saldo < minWd) {
-            alert('⚠️ Saldo belum cukup! Minimal 1 TON.');
+            alert('⚠️ Balance not enough! Minimum 1 TON.');
             return;
         }
-        alert('💳 Proses withdraw ke dompet TON...');
+        alert('💳 Withdraw process to TON wallet...');
     });
 
     buatKalender();

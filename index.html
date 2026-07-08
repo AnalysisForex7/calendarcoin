@@ -5,24 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Coin</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
-            background: #FFF8E7;
-            padding: 20px;
+            background: #f5f0eb;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
         }
         .box {
             max-width: 400px;
             width: 100%;
             background: white;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 24px;
+            padding: 24px 20px 30px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
-        h1 { color: #5D4037; font-size: 28px; }
-        .date { font-size: 18px; color: #888; margin-bottom: 10px; }
+        h1 { font-size: 28px; color: #5D4037; }
+        .date { font-size: 16px; color: #999; margin: 4px 0 16px; }
         .grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -30,14 +33,14 @@
             background: #f0ebe6;
             padding: 10px;
             border-radius: 12px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .grid .n { font-size: 12px; font-weight: bold; color: #999; padding: 4px; }
         .grid .d { padding: 8px; border-radius: 50%; font-size: 14px; }
         .grid .d.today { background: #4CAF50; color: white; font-weight: bold; }
         .grid .d.done { background: #C8E6C9; color: #2E7D32; }
         .grid .d.empty { visibility: hidden; }
-        .status { font-size: 16px; color: #FF9800; margin: 10px 0; }
+        .status { font-size: 15px; color: #FF9800; margin: 10px 0; }
         .btn {
             width: 100%;
             padding: 16px;
@@ -53,7 +56,6 @@
         .btn-claim:disabled { background: #ccc; }
         .btn-withdraw { background: #FF9800; color: white; }
         .btn-withdraw:disabled { background: #ccc; }
-        .btn-referral { background: #2196F3; color: white; }
         .saldo {
             background: #fafafa;
             border-radius: 12px;
@@ -62,37 +64,13 @@
         }
         .saldo .label { color: #999; font-size: 13px; }
         .saldo .jumlah { font-size: 32px; font-weight: bold; color: #222; }
-        .saldo .jumlah .ton { font-size: 18px; color: #0088CC; }
+        .saldo .ton { font-size: 18px; color: #0088CC; }
         .saldo .usd { font-size: 14px; color: #999; }
-        .referral-box {
-            background: #E3F2FD;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-        }
-        .referral-box .label { color: #1565C0; font-size: 13px; }
-        .referral-box .count { font-size: 24px; font-weight: bold; color: #0D47A1; }
-        .referral-box .reward-info { font-size: 12px; color: #666; }
-        .referral-link {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            word-break: break-all;
-            margin: 8px 0;
-            color: #555;
-        }
-        .referral-status {
-            font-size: 12px;
-            color: #FF9800;
-            margin: 4px 0;
-        }
     </style>
 </head>
 <body>
 
 <div class="box">
-
     <h1>📅 Calendar Coin</h1>
     <div class="date" id="tgl">Loading...</div>
 
@@ -100,7 +78,7 @@
 
     <div class="status" id="status">✨ Today: Not claimed yet</div>
 
-    <button class="btn btn-claim" id="tombolAmbil">🪙 Claim Today's Coin</button>
+    <button class="btn btn-claim" id="btnClaim">🪙 Claim Today's Coin</button>
 
     <div class="saldo">
         <div class="label">Total Coins</div>
@@ -110,27 +88,10 @@
         <div class="usd">$<span id="saldoUsd">0.000</span></div>
     </div>
 
-    <!-- REFERRAL SECTION -->
-    <div class="referral-box">
-        <div class="label">👥 Referrals</div>
-        <div class="count" id="referralCount">0</div>
-        <div class="reward-info">1 TON per valid referral</div>
-        <div class="referral-status" id="referralStatus">⏳ Referral counted after 3 daily claims</div>
-        <div class="referral-link" id="referralLink">Loading...</div>
-        <button class="btn btn-referral" id="tombolReferral">📤 Share Referral Link</button>
-    </div>
-
-    <button class="btn btn-withdraw" id="tombolWd">💳 Withdraw (Min. 1 TON)</button>
-
+    <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw (Min. 1 TON)</button>
 </div>
 
 <script>
-    // ========== TELEGRAM WEB APP ==========
-    var tg = window.Telegram?.WebApp || {};
-    var user = tg.initDataUnsafe?.user || {};
-    var userId = user.id || 'guest';
-    var userFirstName = user.first_name || 'User';
-
     // ========== DATA ==========
     var today = new Date();
     var tgl = today.getDate();
@@ -140,75 +101,18 @@
     var saldo = 0;
     var reward = 0.0005;
     var minWd = 1;
-    var referralReward = 0.000000035; // 1 TON ≈ Rp 28.000 → Rp 1
-    var referralCount = 0;
 
-    // Simulasi data referral (di backend pakai database)
-    var referralData = {
-        // userId: { count: 0, claimDays: 0, lastClaim: '' }
-    };
-
-    // ========== FUNGSI ==========
-
-    // Generate referral link dengan user ID beneran
-    function getReferralLink() {
-        if (userId === 'guest') {
-            return 'https://t.me/CalendarCoinBot/rewards?start=guest';
-        }
-        return 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
-    }
-
-    // Cek apakah user ini valid (sudah claim 3 hari)
-    function isReferralValid(userId) {
-        var data = referralData[userId];
-        if (!data) return false;
-        return data.claimDays >= 3;
-    }
-
-    // Update tampilan referral
-    function updateReferralUI() {
-        var link = getReferralLink();
-        document.getElementById('referralLink').textContent = link;
-
-        // Hitung referral yang valid (claim >= 3 hari)
-        var validCount = 0;
-        for (var key in referralData) {
-            if (referralData[key].claimDays >= 3) {
-                validCount++;
-            }
-        }
-        // Tambahkan referral yang sudah dihitung
-        referralCount = validCount;
-        document.getElementById('referralCount').textContent = referralCount;
-
-        // Status validasi
-        var statusText = document.getElementById('referralStatus');
-        if (userId !== 'guest') {
-            var myData = referralData[userId];
-            if (myData) {
-                var daysLeft = 3 - myData.claimDays;
-                if (daysLeft <= 0) {
-                    statusText.textContent = '✅ Your referrals are valid!';
-                } else {
-                    statusText.textContent = '⏳ Need ' + daysLeft + ' more daily claim(s) to validate referrals';
-                }
-            } else {
-                statusText.textContent = '⏳ Claim daily for 3 days to validate referrals';
-            }
-        }
-    }
-
-    // ========== RENDER KALENDER ==========
+    // ========== KALENDER ==========
     function buatKalender() {
         var hari = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        var hariPertama = new Date(tahun, bulan, 1).getDay();
+        var firstDay = new Date(tahun, bulan, 1).getDay();
         var totalHari = new Date(tahun, bulan+1, 0).getDate();
 
         var html = '';
         for (var i = 0; i < 7; i++) {
             html += '<div class="n">'+hari[i]+'</div>';
         }
-        for (var i = 0; i < hariPertama; i++) {
+        for (var i = 0; i < firstDay; i++) {
             html += '<div class="d empty"></div>';
         }
         for (var d = 1; d <= totalHari; d++) {
@@ -224,101 +128,53 @@
         document.getElementById('tgl').textContent = today.toLocaleDateString('en-US', opt);
     }
 
-    // ========== UPDATE UI ==========
+    // ========== UPDATE ==========
     function updateUI() {
-        // Saldo TON
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
-        // Konversi ke USD (1 TON ≈ $1.65)
         var usd = saldo * 1.65;
         document.getElementById('saldoUsd').textContent = usd.toFixed(3);
 
-        // Status Claim
-        var status = document.getElementById('status');
-        var tombol = document.getElementById('tombolAmbil');
         var sudahClaim = false;
+        var status = document.getElementById('status');
+        var btn = document.getElementById('btnClaim');
         if (sudahClaim) {
             status.textContent = '✅ Today: Already claimed!';
-            tombol.disabled = true;
-            tombol.textContent = '✅ Already claimed today';
+            btn.disabled = true;
+            btn.textContent = '✅ Already claimed today';
         } else {
             status.textContent = '✨ Today: Not claimed yet';
-            tombol.disabled = false;
-            tombol.textContent = '🪙 Claim Today\'s Coin';
+            btn.disabled = false;
+            btn.textContent = '🪙 Claim Today\'s Coin';
         }
 
-        // Withdraw
-        var btnWd = document.getElementById('tombolWd');
+        var wd = document.getElementById('btnWithdraw');
         if (saldo >= minWd) {
-            btnWd.disabled = false;
-            btnWd.textContent = '💳 Withdraw Now';
+            wd.disabled = false;
+            wd.textContent = '💳 Withdraw Now';
         } else {
-            btnWd.disabled = true;
-            btnWd.textContent = '💳 Withdraw (Min. 1 TON)';
+            wd.disabled = true;
+            wd.textContent = '💳 Withdraw (Min. 1 TON)';
         }
-
-        // Referral
-        updateReferralUI();
-    }
-
-    // ========== CLAIM ==========
-    function doClaim() {
-        // Tambah saldo
-        saldo = saldo + reward;
-
-        // Update data referral (simulasi)
-        if (userId !== 'guest') {
-            if (!referralData[userId]) {
-                referralData[userId] = { count: 0, claimDays: 0, lastClaim: '' };
-            }
-            var todayStr = today.toISOString().split('T')[0];
-            if (referralData[userId].lastClaim !== todayStr) {
-                referralData[userId].claimDays = referralData[userId].claimDays + 1;
-                referralData[userId].lastClaim = todayStr;
-                // Update poin referral
-                referralData[userId].count = referralData[userId].count + 1;
-            }
-        }
-
-        updateUI();
-        alert('🎉 +0.0005 TON!');
     }
 
     // ========== EVENT ==========
-    document.getElementById('tombolAmbil').addEventListener('click', function() {
-        doClaim();
-    });
+    document.getElementById('btnClaim').onclick = function() {
+        saldo = saldo + reward;
+        updateUI();
+        alert('+0.0005 TON!');
+    };
 
-    document.getElementById('tombolWd').addEventListener('click', function() {
+    document.getElementById('btnWithdraw').onclick = function() {
         if (saldo < minWd) {
-            alert('⚠️ Balance not enough! Minimum 1 TON.');
+            alert('Balance not enough! Minimum 1 TON.');
             return;
         }
-        alert('💳 Withdraw process to TON wallet...');
-    });
+        alert('Withdraw to TON wallet...');
+    };
 
-    document.getElementById('tombolReferral').addEventListener('click', function() {
-        var link = getReferralLink();
-        if (navigator.share) {
-            navigator.share({
-                title: 'Calendar Coin',
-                text: 'Join Calendar Coin and earn TON! Use my referral link:',
-                url: link
-            });
-        } else {
-            navigator.clipboard.writeText(link).then(function() {
-                alert('✅ Referral link copied! Share it with your friends.');
-            }).catch(function() {
-                prompt('Copy this link:', link);
-            });
-        }
-    });
-
-    // ========== INIT ==========
+    // ========== START ==========
     buatKalender();
     updateUI();
-
-    console.log('✅ Calendar Coin ready! User ID:', userId);
-    console.log('User:', userFirstName);
 </script>
 
 </body>

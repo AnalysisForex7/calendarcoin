@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Coin</title>
     <style>
-        /* ===== RESET ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
             background: #0D1117;
             display: flex;
             justify-content: center;
@@ -17,7 +15,6 @@
             min-height: 100vh;
             padding: 16px;
         }
-
         .card {
             max-width: 380px;
             width: 100%;
@@ -27,8 +24,6 @@
             border: 1px solid #30363D;
             box-shadow: 0 20px 60px rgba(0,0,0,0.6);
         }
-
-        /* ===== HEADER ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -51,16 +46,12 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        /* ===== DATE ===== */
         .date {
             font-size: 14px;
             color: #8B949E;
             margin-bottom: 18px;
             font-weight: 400;
         }
-
-        /* ===== CALENDAR ===== */
         .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -103,8 +94,6 @@
         .calendar .day.empty {
             visibility: hidden;
         }
-
-        /* ===== STATUS ===== */
         .status {
             font-size: 14px;
             color: #F0883E;
@@ -112,8 +101,6 @@
             margin-bottom: 14px;
             font-weight: 450;
         }
-
-        /* ===== BUTTONS ===== */
         .btn {
             width: 100%;
             padding: 14px;
@@ -146,8 +133,6 @@
             color: #484F58;
             cursor: not-allowed;
         }
-
-        /* ===== BALANCE ===== */
         .balance {
             background: #0D1117;
             border-radius: 16px;
@@ -178,39 +163,66 @@
             color: #8B949E;
             margin-top: 2px;
         }
-
-        /* ===== FOOTER ===== */
         .footer {
             font-size: 11px;
             color: #484F58;
             text-align: center;
             margin-top: 14px;
         }
+        .referral-box {
+            background: #0D1117;
+            border-radius: 16px;
+            padding: 14px;
+            margin: 14px 0 12px;
+            border: 1px solid #21262D;
+        }
+        .referral-box .label {
+            font-size: 12px;
+            color: #8B949E;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        .referral-box .count {
+            font-size: 24px;
+            font-weight: 700;
+            color: #F0F6FC;
+        }
+        .referral-box .link {
+            font-size: 11px;
+            color: #58A6FF;
+            word-break: break-all;
+            margin: 6px 0;
+            background: #161B22;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+        .btn-referral {
+            background: #1F6FEB;
+            color: #fff;
+            font-size: 14px;
+            padding: 12px;
+        }
+        .btn-referral:hover { background: #388BFD; }
     </style>
 </head>
 <body>
 
 <div class="card">
 
-    <!-- HEADER -->
     <div class="header">
         <h1>📅 Calendar</h1>
         <span class="badge">TON</span>
     </div>
 
-    <!-- DATE -->
     <div class="date" id="tgl">Loading...</div>
 
-    <!-- CALENDAR -->
     <div class="calendar" id="kalender"></div>
 
-    <!-- STATUS -->
     <div class="status" id="status">✨ Not claimed today</div>
 
-    <!-- BUTTON CLAIM -->
     <button class="btn btn-claim" id="btnClaim">🪙 Claim Daily Coin</button>
 
-    <!-- BALANCE -->
     <div class="balance">
         <div class="label">Balance</div>
         <div class="amount">
@@ -219,10 +231,16 @@
         <div class="usd">$<span id="saldoUsd">0.000</span></div>
     </div>
 
-    <!-- BUTTON WITHDRAW -->
     <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw</button>
 
-    <!-- FOOTER -->
+    <!-- REFERRAL -->
+    <div class="referral-box">
+        <div class="label">👥 Referrals</div>
+        <div class="count" id="referralCount">0</div>
+        <div class="link" id="referralLink">Loading...</div>
+        <button class="btn btn-referral" id="btnReferral">📤 Share Link</button>
+    </div>
+
     <div class="footer">Min. 1 TON · Secure · Fast</div>
 
 </div>
@@ -234,11 +252,19 @@
     var bulan = today.getMonth();
     var tahun = today.getFullYear();
 
-    var saldo = 0;
+    // Ambil data dari localStorage
+    var saldo = parseFloat(localStorage.getItem('saldo')) || 0;
+    var lastClaim = localStorage.getItem('lastClaim') || '';
+    var referralCount = parseInt(localStorage.getItem('referralCount')) || 0;
+
     var reward = 0.0005;
     var minWd = 1;
 
-    // ===== CALENDAR =====
+    // ===== CEK SUDAH CLAIM HARI INI? =====
+    var todayStr = today.toISOString().split('T')[0];
+    var alreadyClaimed = (lastClaim === todayStr);
+
+    // ===== KALENDER =====
     function renderCalendar() {
         var days = ['S','M','T','W','T','F','S'];
         var firstDay = new Date(tahun, bulan, 1).getDay();
@@ -267,11 +293,12 @@
     function updateUI() {
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
         document.getElementById('saldoUsd').textContent = (saldo * 1.65).toFixed(3);
+        document.getElementById('referralCount').textContent = referralCount;
 
         var status = document.getElementById('status');
         var btn = document.getElementById('btnClaim');
-        var sudahClaim = false;
-        if (sudahClaim) {
+
+        if (alreadyClaimed) {
             status.textContent = '✅ Claimed today';
             btn.disabled = true;
             btn.textContent = '✅ Claimed';
@@ -289,15 +316,59 @@
             wd.disabled = true;
             wd.textContent = '💳 Withdraw ('+minWd+' TON min)';
         }
+
+        // Referral link
+        var userId = 'guest';
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+            userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+        }
+        document.getElementById('referralLink').textContent =
+            'https://t.me/CalendarCoinBot/rewards?start=' + userId;
+    }
+
+    // ===== SIMPAN =====
+    function saveData() {
+        localStorage.setItem('saldo', saldo);
+        localStorage.setItem('lastClaim', lastClaim);
+        localStorage.setItem('referralCount', referralCount);
+    }
+
+    // ===== CLAIM =====
+    function doClaim() {
+        if (alreadyClaimed) {
+            alert('✅ Already claimed today! Come back tomorrow.');
+            return;
+        }
+
+        saldo += reward;
+        lastClaim = todayStr;
+        alreadyClaimed = true;
+        saveData();
+        updateUI();
+        alert('🎉 +'+reward+' TON');
+    }
+
+    // ===== REFERRAL =====
+    function shareReferral() {
+        var link = document.getElementById('referralLink').textContent;
+        if (navigator.share) {
+            navigator.share({ title: 'Calendar Coin', text: 'Join me on Calendar Coin!', url: link });
+        } else {
+            navigator.clipboard.writeText(link).then(function() {
+                alert('✅ Link copied!');
+                // Simulasi referral
+                referralCount += 1;
+                saldo += 0.0005; // bonus referral
+                saveData();
+                updateUI();
+            }).catch(function() {
+                prompt('Copy this link:', link);
+            });
+        }
     }
 
     // ===== EVENTS =====
-    document.getElementById('btnClaim').onclick = function() {
-        saldo += reward;
-        updateUI();
-        alert('🎉 +'+reward+' TON');
-    };
-
+    document.getElementById('btnClaim').onclick = doClaim;
     document.getElementById('btnWithdraw').onclick = function() {
         if (saldo < minWd) {
             alert('⚠️ Minimum '+minWd+' TON required');
@@ -305,10 +376,15 @@
         }
         alert('💳 Withdraw to wallet...');
     };
+    document.getElementById('btnReferral').onclick = shareReferral;
 
     // ===== START =====
     renderCalendar();
     updateUI();
+
+    console.log('✅ Calendar Coin ready!');
+    console.log('Saldo:', saldo, 'TON');
+    console.log('Last claim:', lastClaim);
 </script>
 
 </body>

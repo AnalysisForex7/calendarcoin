@@ -145,101 +145,49 @@
 </div>
 
 <script>
-    // ============================================================
-    // 1. AMBIL DATA TELEGRAM
-    // ============================================================
+    // ===== TELEGRAM =====
     var tg = window.Telegram?.WebApp || {};
     var user = tg.initDataUnsafe?.user || {};
     var userId = user.id || null;
     var username = user.username || null;
-    var deviceId = '';
 
-    // ============================================================
-    // 2. DETEKSI PERANGKAT (Device Fingerprint)
-    // ============================================================
+    // ===== DEVICE FINGERPRINT =====
     function getDeviceId() {
         var screen = screen.width + 'x' + screen.height;
-        var userAgent = navigator.userAgent;
-        var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var ua = navigator.userAgent;
+        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         var lang = navigator.language || 'en-US';
-        var fingerprint = screen + '|' + userAgent + '|' + timezone + '|' + lang;
-        return fingerprint;
+        return screen + '|' + ua + '|' + tz + '|' + lang;
     }
+    var deviceId = getDeviceId();
 
-    deviceId = getDeviceId();
-
-    // ============================================================
-    // 3. DATA APLIKASI
-    // ============================================================
+    // ===== DATA =====
     var today = new Date();
     var tgl = today.getDate();
     var bulan = today.getMonth();
     var tahun = today.getFullYear();
     var todayStr = today.toISOString().split('T')[0];
 
-    // ============================================================
-    // 4. LOCAL STORAGE
-    // ============================================================
     var saldo = parseFloat(localStorage.getItem('saldo')) || 0;
     var lastClaim = localStorage.getItem('lastClaim') || '';
     var alreadyClaimed = (lastClaim === todayStr);
-
-    // ============================================================
-    // 5. REFERRAL SYSTEM (Dengan Validasi)
-    // ============================================================
-    // Format referralData:
-    // {
-    //   "referrerId": {
-    //     "count": 0,         // total referral yang valid
-    //     "list": {
-    //       "userId": {
-    //         "username": "joko",
-    //         "deviceId": "xxx",
-    //         "claimDays": 0,
-    //         "firstClaim": "2026-07-08",
-    //         "lastClaim": "2026-07-10",
-    //         "isValid": false
-    //       }
-    //     }
-    //   }
-    // }
-
     var referralData = JSON.parse(localStorage.getItem('referralData')) || {};
     var userReferrals = referralData[userId] || { count: 0, list: {} };
 
-    // ============================================================
-    // 6. VALIDASI REFERRAL
-    // ============================================================
+    // ===== FUNGSI REFERRAL =====
     function isValidReferral(refUserId) {
         var refData = userReferrals.list[refUserId];
         if (!refData) return false;
-
-        // Syarat 1: Harus punya username
         if (!refData.username) return false;
-
-        // Syarat 2: Minimal claim 3 hari
         if (refData.claimDays < 3) return false;
-
-        // Syarat 3: Device ID unik (gak boleh sama dengan referrer atau user lain)
         if (refData.deviceId === deviceId) return false;
-
-        // Syarat 4: Sudah login minimal 3 hari berbeda
-        var firstClaim = new Date(refData.firstClaim);
-        var diffDays = Math.floor((today - firstClaim) / (1000 * 60 * 60 * 24));
-        if (diffDays < 3) return false;
-
         return true;
     }
 
-    // ============================================================
-    // 7. HITUNG REFERRAL VALID
-    // ============================================================
     function countValidReferrals() {
         var count = 0;
         for (var key in userReferrals.list) {
-            if (isValidReferral(key)) {
-                count++;
-            }
+            if (isValidReferral(key)) count++;
         }
         userReferrals.count = count;
         referralData[userId] = userReferrals;
@@ -247,30 +195,12 @@
         return count;
     }
 
-    // ============================================================
-    // 8. TAMBAH REFERRAL (dipanggil saat user daftar pake link)
-    // ============================================================
     function addReferral(refUserId, refUsername, refDeviceId) {
-        // Cek apakah referral sudah ada
-        if (userReferrals.list[refUserId]) {
-            return;
-        }
-
-        // Cek device ID (tuyul prevention)
-        if (refDeviceId === deviceId) {
-            console.warn('⚠️ Device ID sama dengan referrer!');
-            return;
-        }
-
-        // Cek apakah device sudah dipakai user lain
+        if (userReferrals.list[refUserId]) return;
+        if (refDeviceId === deviceId) return;
         for (var key in userReferrals.list) {
-            if (userReferrals.list[key].deviceId === refDeviceId) {
-                console.warn('⚠️ Device ID sudah terdaftar!');
-                return;
-            }
+            if (userReferrals.list[key].deviceId === refDeviceId) return;
         }
-
-        // Tambah referral baru
         userReferrals.list[refUserId] = {
             username: refUsername,
             deviceId: refDeviceId,
@@ -279,31 +209,23 @@
             lastClaim: '',
             isValid: false
         };
-
         referralData[userId] = userReferrals;
         localStorage.setItem('referralData', JSON.stringify(referralData));
     }
 
-    // ============================================================
-    // 9. UPDATE CLAIM REFERRAL (dipanggil setiap user claim)
-    // ============================================================
-    function updateReferralClaim(userId) {
-        // Cari apakah user ini ada di list referral
+    function updateReferralClaim(uid) {
         for (var refKey in referralData) {
             var refList = referralData[refKey].list;
-            if (refList[userId]) {
-                var refData = refList[userId];
-                // Update claim days (cuma 1x per hari)
+            if (refList[uid]) {
+                var refData = refList[uid];
                 if (refData.lastClaim !== todayStr) {
-                    refData.claimDays = refData.claimDays + 1;
+                    refData.claimDays++;
                     refData.lastClaim = todayStr;
-                    refData.isValid = isValidReferral(userId);
-                    // Kalau valid, tambah bonus ke referrer
+                    refData.isValid = isValidReferral(uid);
                     if (refData.isValid) {
-                        var referrerSaldo = parseFloat(localStorage.getItem('saldo')) || 0;
-                        referrerSaldo += 0.0005; // bonus referral
-                        localStorage.setItem('saldo', referrerSaldo);
-                        console.log('🎉 Referral bonus untuk ' + refKey);
+                        var bonus = parseFloat(localStorage.getItem('saldo')) || 0;
+                        bonus += 0.0005;
+                        localStorage.setItem('saldo', bonus);
                     }
                     localStorage.setItem('referralData', JSON.stringify(referralData));
                 }
@@ -312,29 +234,31 @@
         }
     }
 
-    // ============================================================
-    // 10. FUNGSI LAIN
-    // ============================================================
     function getReferralLink() {
         if (!userId) return 'https://t.me/CalendarCoinBot/rewards';
         return 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
     }
 
-    // ============================================================
-    // 11. KALENDER
-    // ============================================================
+    function handleReferralStart() {
+        var startParam = tg.initDataUnsafe?.start_param || null;
+        if (startParam && startParam !== userId && userId) {
+            var refUsername = user.username || 'unknown';
+            addReferral(startParam, refUsername, deviceId);
+            saldo += 0.0005;
+            localStorage.setItem('saldo', saldo);
+            updateUI();
+            alert('🎉 Welcome! +0.0005 TON bonus from referral!');
+        }
+    }
+
+    // ===== KALENDER =====
     function renderCalendar() {
         var days = ['S','M','T','W','T','F','S'];
         var firstDay = new Date(tahun, bulan, 1).getDay();
         var totalDays = new Date(tahun, bulan+1, 0).getDate();
-
         var html = '';
-        for (var i = 0; i < 7; i++) {
-            html += '<div class="day-name">'+days[i]+'</div>';
-        }
-        for (var i = 0; i < firstDay; i++) {
-            html += '<div class="day empty"></div>';
-        }
+        for (var i = 0; i < 7; i++) html += '<div class="day-name">'+days[i]+'</div>';
+        for (var i = 0; i < firstDay; i++) html += '<div class="day empty"></div>';
         for (var d = 1; d <= totalDays; d++) {
             var cls = 'day';
             if (d === tgl) cls += ' today';
@@ -342,20 +266,17 @@
             html += '<div class="'+cls+'">'+d+'</div>';
         }
         document.getElementById('kalender').innerHTML = html;
-
         var opt = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
         document.getElementById('tgl').textContent = today.toLocaleDateString('en-US', opt);
     }
 
-    // ============================================================
-    // 12. UPDATE UI
-    // ============================================================
+    // ===== UPDATE UI =====
     function updateUI() {
-        // Balance
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
         document.getElementById('saldoUsd').textContent = (saldo * 1.65).toFixed(3);
+        document.getElementById('referralCount').textContent = countValidReferrals();
+        document.getElementById('referralLink').textContent = getReferralLink();
 
-        // Claim status
         var status = document.getElementById('status');
         var btn = document.getElementById('btnClaim');
         if (alreadyClaimed) {
@@ -368,7 +289,6 @@
             btn.textContent = '🪙 Claim Daily Coin';
         }
 
-        // Withdraw
         var wd = document.getElementById('btnWithdraw');
         if (saldo >= 1) {
             wd.disabled = false;
@@ -378,18 +298,12 @@
             wd.textContent = '💳 Withdraw (1 TON min)';
         }
 
-        // Referral
-        var validCount = countValidReferrals();
-        document.getElementById('referralCount').textContent = validCount;
-        document.getElementById('referralLink').textContent = getReferralLink();
-
-        // Status referral
         var refStatus = document.getElementById('referralStatus');
         if (!username) {
-            refStatus.textContent = '⚠️ Set Telegram username first! (Settings)';
+            refStatus.textContent = '⚠️ Set Telegram username first!';
             refStatus.style.color = '#F85149';
-        } else if (validCount > 0) {
-            refStatus.textContent = '✅ ' + validCount + ' valid referral(s)';
+        } else if (countValidReferrals() > 0) {
+            refStatus.textContent = '✅ ' + countValidReferrals() + ' valid referral(s)';
             refStatus.style.color = '#3FB950';
         } else {
             refStatus.textContent = '⏳ Need 3 daily claims & username';
@@ -397,121 +311,67 @@
         }
     }
 
-    // ============================================================
-    // 13. SIMPAN DATA
-    // ============================================================
+    // ===== SAVE =====
     function saveData() {
         localStorage.setItem('saldo', saldo);
         localStorage.setItem('lastClaim', lastClaim);
         localStorage.setItem('referralData', JSON.stringify(referralData));
     }
 
-    // ============================================================
-    // 14. CLAIM
-    // ============================================================
+    // ===== CLAIM =====
     function doClaim() {
         if (alreadyClaimed) {
             alert('✅ Already claimed today! Come back tomorrow.');
             return;
         }
-
-        // Cek username
         if (!username) {
-            alert('⚠️ Please set a Telegram username first!\nGo to Settings → Username.');
+            alert('⚠️ Please set a Telegram username first!');
             return;
         }
-
-        // Cek device ID
         var savedDevice = localStorage.getItem('deviceId');
         if (savedDevice && savedDevice !== deviceId) {
-            alert('⚠️ This device is already registered with another account!');
+            alert('⚠️ This device is already registered!');
             return;
         }
         localStorage.setItem('deviceId', deviceId);
 
-        // Tambah saldo
         saldo += 0.0005;
         lastClaim = todayStr;
         alreadyClaimed = true;
-
-        // Update referral claim untuk user ini
         updateReferralClaim(userId);
-
         saveData();
         updateUI();
         alert('🎉 +0.0005 TON!');
     }
 
-    // ============================================================
-    // 15. SHARE REFERRAL
-    // ============================================================
+    // ===== SHARE =====
     function shareReferral() {
         var link = getReferralLink();
-        var message = 'Join Calendar Coin and earn TON!\nUse my referral link:\n' + link;
-
         if (navigator.share) {
-            navigator.share({
-                title: 'Calendar Coin',
-                text: message,
-                url: link
-            }).catch(function(err) {
-                console.log('Share cancelled');
-            });
+            navigator.share({ title: 'Calendar Coin', text: 'Join me on Calendar Coin!', url: link });
         } else {
             navigator.clipboard.writeText(link).then(function() {
-                alert('✅ Referral link copied!\nShare it with your friends.');
+                alert('✅ Referral link copied!');
             }).catch(function() {
                 prompt('Copy this link:', link);
             });
         }
     }
 
-    // ============================================================
-    // 16. SIMULASI REFERRAL DARI LINK (untuk testing)
-    // ============================================================
-    function handleReferralStart() {
-        // Cek parameter start dari Telegram
-        var startParam = tg.initDataUnsafe?.start_param || null;
-        if (startParam && startParam !== userId && userId) {
-            // Ada referral! Tambahkan referrer
-            var referrerId = startParam;
-            var refUsername = user.username || 'unknown';
-            var refDeviceId = deviceId;
-            addReferral(referrerId, refUsername, refDeviceId);
-            console.log('📥 Referral from: ' + referrerId);
-            // Bonus untuk user baru
-            saldo += 0.0005;
-            saveData();
-            updateUI();
-            alert('🎉 Welcome! +0.0005 TON bonus from referral!');
-        }
-    }
-
-    // ============================================================
-    // 17. EVENTS
-    // ============================================================
+    // ===== EVENTS =====
     document.getElementById('btnClaim').onclick = doClaim;
     document.getElementById('btnWithdraw').onclick = function() {
-        if (saldo < 1) {
-            alert('⚠️ Minimum 1 TON required');
-            return;
-        }
+        if (saldo < 1) { alert('⚠️ Minimum 1 TON required'); return; }
         alert('💳 Withdraw to wallet...');
     };
     document.getElementById('btnReferral').onclick = shareReferral;
 
-    // ============================================================
-    // 18. START
-    // ============================================================
+    // ===== START =====
     renderCalendar();
     handleReferralStart();
     updateUI();
 
     console.log('✅ Calendar Coin ready!');
-    console.log('User ID:', userId);
-    console.log('Username:', username);
-    console.log('Device ID:', deviceId);
-    console.log('Saldo:', saldo);
 </script>
 
 </body>

@@ -1,42 +1,105 @@
 let balance = Number(localStorage.getItem("balance")) || 0;
+let mineTime = Number(localStorage.getItem("mineTime")) || 0;
+let dailyDate = localStorage.getItem("dailyDate") || "";
 
-document.getElementById("balance").innerHTML = balance + " Coin";
+const balanceEl = document.getElementById("balance");
+const timerEl = document.getElementById("timer");
+const mineBtn = document.getElementById("mineBtn");
+const adsBtn = document.getElementById("adsBtn");
+const dailyBtn = document.getElementById("dailyBtn");
+const withdrawBtn = document.getElementById("withdrawBtn");
 
 function save() {
     localStorage.setItem("balance", balance);
-    document.getElementById("balance").innerHTML = balance + " Coin";
+    localStorage.setItem("mineTime", mineTime);
+    localStorage.setItem("dailyDate", dailyDate);
 }
 
-function watchAds() {
-    alert("Iklan selesai. +5 Coin");
+function updateBalance() {
+    balanceEl.innerHTML = balance + " Coin";
+
+    if (balance >= 10000) {
+        withdrawBtn.disabled = false;
+    } else {
+        withdrawBtn.disabled = true;
+    }
+}
+
+mineBtn.onclick = function () {
+
+    if (Date.now() < mineTime) return;
+
+    balance += 100;
+    mineTime = Date.now() + 24 * 60 * 60 * 1000;
+
+    save();
+    updateBalance();
+    updateTimer();
+
+    alert("Mining berhasil! +100 Coin");
+};
+
+adsBtn.onclick = function () {
     balance += 5;
     save();
-}
+    updateBalance();
+    alert("+5 Coin");
+};
 
-function dailyLogin() {
+dailyBtn.onclick = function () {
+
     let today = new Date().toDateString();
 
-    if (localStorage.getItem("daily") == today) {
-        alert("Daily sudah diklaim hari ini.");
+    if (today == dailyDate) {
+        alert("Daily hari ini sudah diambil");
         return;
     }
 
-    localStorage.setItem("daily", today);
+    dailyDate = today;
     balance += 5;
+
     save();
-}
+    updateBalance();
 
-function claimMining() {
-    let now = Date.now();
-    let last = Number(localStorage.getItem("mining")) || 0;
+    alert("Daily berhasil +5 Coin");
+};
 
-    if (now - last < 86400000) {
-        alert("Mining baru bisa diklaim setiap 24 jam.");
+withdrawBtn.onclick = function () {
+
+    if (balance < 10000) {
+        alert("Minimal 10.000 Coin");
         return;
     }
 
-    localStorage.setItem("mining", now);
-    balance += 100;
-    save();
-    alert("Mining berhasil! +100 Coin");
+    alert("Fitur withdraw belum tersedia");
+};
+
+function updateTimer() {
+
+    let now = Date.now();
+
+    if (now >= mineTime) {
+
+        timerEl.innerHTML = "Ready";
+        mineBtn.disabled = false;
+        return;
+    }
+
+    mineBtn.disabled = true;
+
+    let diff = mineTime - now;
+
+    let h = Math.floor(diff / 3600000);
+    let m = Math.floor((diff % 3600000) / 60000);
+    let s = Math.floor((diff % 60000) / 1000);
+
+    timerEl.innerHTML =
+        String(h).padStart(2, "0") + ":" +
+        String(m).padStart(2, "0") + ":" +
+        String(s).padStart(2, "0");
 }
+
+setInterval(updateTimer, 1000);
+
+updateBalance();
+updateTimer();

@@ -5,94 +5,230 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Coin</title>
     <style>
+        /* ===== RESET ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f0eb;
+            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0D1117;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 16px;
         }
-        .box {
-            max-width: 400px;
+
+        .card {
+            max-width: 380px;
             width: 100%;
-            background: white;
-            border-radius: 24px;
-            padding: 24px 20px 30px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            background: #161B22;
+            border-radius: 28px;
+            padding: 24px 20px 28px;
+            border: 1px solid #30363D;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
         }
-        h1 { font-size: 28px; color: #5D4037; }
-        .date { font-size: 16px; color: #999; margin: 4px 0 16px; }
-        .grid {
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #F0F6FC;
+            letter-spacing: -0.3px;
+        }
+        .header .badge {
+            background: #238636;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== DATE ===== */
+        .date {
+            font-size: 14px;
+            color: #8B949E;
+            margin-bottom: 18px;
+            font-weight: 400;
+        }
+
+        /* ===== CALENDAR ===== */
+        .calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            background: #f0ebe6;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 16px;
+            gap: 2px;
+            background: #0D1117;
+            padding: 8px;
+            border-radius: 16px;
+            margin-bottom: 20px;
         }
-        .grid .n { font-size: 12px; font-weight: bold; color: #999; padding: 4px; }
-        .grid .d { padding: 8px; border-radius: 50%; font-size: 14px; }
-        .grid .d.today { background: #4CAF50; color: white; font-weight: bold; }
-        .grid .d.done { background: #C8E6C9; color: #2E7D32; }
-        .grid .d.empty { visibility: hidden; }
-        .status { font-size: 15px; color: #FF9800; margin: 10px 0; }
+        .calendar .day-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8B949E;
+            text-align: center;
+            padding: 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .calendar .day {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #C9D1D9;
+            border-radius: 50%;
+            transition: 0.15s;
+        }
+        .calendar .day.today {
+            background: #238636;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 0 0 2px #238636;
+        }
+        .calendar .day.done {
+            color: #8B949E;
+            opacity: 0.4;
+        }
+        .calendar .day.empty {
+            visibility: hidden;
+        }
+
+        /* ===== STATUS ===== */
+        .status {
+            font-size: 14px;
+            color: #F0883E;
+            text-align: center;
+            margin-bottom: 14px;
+            font-weight: 450;
+        }
+
+        /* ===== BUTTONS ===== */
         .btn {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             border: none;
             border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 12px;
+            transition: 0.15s;
+            margin-bottom: 10px;
         }
-        .btn:active { transform: scale(0.96); }
-        .btn-claim { background: #4CAF50; color: white; }
-        .btn-claim:disabled { background: #ccc; }
-        .btn-withdraw { background: #FF9800; color: white; }
-        .btn-withdraw:disabled { background: #ccc; }
-        .saldo {
-            background: #fafafa;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
+        .btn:active { transform: scale(0.97); }
+        .btn-claim {
+            background: #238636;
+            color: #fff;
         }
-        .saldo .label { color: #999; font-size: 13px; }
-        .saldo .jumlah { font-size: 32px; font-weight: bold; color: #222; }
-        .saldo .ton { font-size: 18px; color: #0088CC; }
-        .saldo .usd { font-size: 14px; color: #999; }
+        .btn-claim:hover { background: #2EA043; }
+        .btn-claim:disabled {
+            background: #21262D;
+            color: #484F58;
+            cursor: not-allowed;
+        }
+        .btn-withdraw {
+            background: #1F6FEB;
+            color: #fff;
+        }
+        .btn-withdraw:hover { background: #388BFD; }
+        .btn-withdraw:disabled {
+            background: #21262D;
+            color: #484F58;
+            cursor: not-allowed;
+        }
+
+        /* ===== BALANCE ===== */
+        .balance {
+            background: #0D1117;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 14px 0 12px;
+            border: 1px solid #21262D;
+        }
+        .balance .label {
+            font-size: 12px;
+            color: #8B949E;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        .balance .amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #F0F6FC;
+            margin-top: 2px;
+        }
+        .balance .amount .ton {
+            font-size: 16px;
+            font-weight: 500;
+            color: #8B949E;
+        }
+        .balance .usd {
+            font-size: 14px;
+            color: #8B949E;
+            margin-top: 2px;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            font-size: 11px;
+            color: #484F58;
+            text-align: center;
+            margin-top: 14px;
+        }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h1>📅 Calendar Coin</h1>
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>📅 Calendar</h1>
+        <span class="badge">TON</span>
+    </div>
+
+    <!-- DATE -->
     <div class="date" id="tgl">Loading...</div>
 
-    <div class="grid" id="kalender"></div>
+    <!-- CALENDAR -->
+    <div class="calendar" id="kalender"></div>
 
-    <div class="status" id="status">✨ Today: Not claimed yet</div>
+    <!-- STATUS -->
+    <div class="status" id="status">✨ Not claimed today</div>
 
-    <button class="btn btn-claim" id="btnClaim">🪙 Claim Today's Coin</button>
+    <!-- BUTTON CLAIM -->
+    <button class="btn btn-claim" id="btnClaim">🪙 Claim Daily Coin</button>
 
-    <div class="saldo">
-        <div class="label">Total Coins</div>
-        <div class="jumlah">
+    <!-- BALANCE -->
+    <div class="balance">
+        <div class="label">Balance</div>
+        <div class="amount">
             <span id="saldoTon">0.000</span> <span class="ton">TON</span>
         </div>
         <div class="usd">$<span id="saldoUsd">0.000</span></div>
     </div>
 
-    <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw (Min. 1 TON)</button>
+    <!-- BUTTON WITHDRAW -->
+    <button class="btn btn-withdraw" id="btnWithdraw">💳 Withdraw</button>
+
+    <!-- FOOTER -->
+    <div class="footer">Min. 1 TON · Secure · Fast</div>
+
 </div>
 
 <script>
-    // ========== DATA ==========
+    // ===== DATA =====
     var today = new Date();
     var tgl = today.getDate();
     var bulan = today.getMonth();
@@ -102,24 +238,23 @@
     var reward = 0.0005;
     var minWd = 1;
 
-    // ========== KALENDER ==========
-    function buatKalender() {
-        var hari = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    // ===== CALENDAR =====
+    function renderCalendar() {
+        var days = ['S','M','T','W','T','F','S'];
         var firstDay = new Date(tahun, bulan, 1).getDay();
-        var totalHari = new Date(tahun, bulan+1, 0).getDate();
+        var totalDays = new Date(tahun, bulan+1, 0).getDate();
 
         var html = '';
         for (var i = 0; i < 7; i++) {
-            html += '<div class="n">'+hari[i]+'</div>';
+            html += '<div class="day-name">'+days[i]+'</div>';
         }
         for (var i = 0; i < firstDay; i++) {
-            html += '<div class="d empty"></div>';
+            html += '<div class="day empty"></div>';
         }
-        for (var d = 1; d <= totalHari; d++) {
-            var cls = 'd';
+        for (var d = 1; d <= totalDays; d++) {
+            var cls = 'day';
             if (d === tgl) cls += ' today';
-            if (d < tgl && d <= 5) cls += ' done';
-            if (d > tgl) cls += ' empty';
+            if (d < tgl) cls += ' done';
             html += '<div class="'+cls+'">'+d+'</div>';
         }
         document.getElementById('kalender').innerHTML = html;
@@ -128,23 +263,22 @@
         document.getElementById('tgl').textContent = today.toLocaleDateString('en-US', opt);
     }
 
-    // ========== UPDATE ==========
+    // ===== UPDATE UI =====
     function updateUI() {
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
-        var usd = saldo * 1.65;
-        document.getElementById('saldoUsd').textContent = usd.toFixed(3);
+        document.getElementById('saldoUsd').textContent = (saldo * 1.65).toFixed(3);
 
-        var sudahClaim = false;
         var status = document.getElementById('status');
         var btn = document.getElementById('btnClaim');
+        var sudahClaim = false;
         if (sudahClaim) {
-            status.textContent = '✅ Today: Already claimed!';
+            status.textContent = '✅ Claimed today';
             btn.disabled = true;
-            btn.textContent = '✅ Already claimed today';
+            btn.textContent = '✅ Claimed';
         } else {
-            status.textContent = '✨ Today: Not claimed yet';
+            status.textContent = '✨ Not claimed today';
             btn.disabled = false;
-            btn.textContent = '🪙 Claim Today\'s Coin';
+            btn.textContent = '🪙 Claim Daily Coin';
         }
 
         var wd = document.getElementById('btnWithdraw');
@@ -153,27 +287,27 @@
             wd.textContent = '💳 Withdraw Now';
         } else {
             wd.disabled = true;
-            wd.textContent = '💳 Withdraw (Min. 1 TON)';
+            wd.textContent = '💳 Withdraw ('+minWd+' TON min)';
         }
     }
 
-    // ========== EVENT ==========
+    // ===== EVENTS =====
     document.getElementById('btnClaim').onclick = function() {
-        saldo = saldo + reward;
+        saldo += reward;
         updateUI();
-        alert('+0.0005 TON!');
+        alert('🎉 +'+reward+' TON');
     };
 
     document.getElementById('btnWithdraw').onclick = function() {
         if (saldo < minWd) {
-            alert('Balance not enough! Minimum 1 TON.');
+            alert('⚠️ Minimum '+minWd+' TON required');
             return;
         }
-        alert('Withdraw to TON wallet...');
+        alert('💳 Withdraw to wallet...');
     };
 
-    // ========== START ==========
-    buatKalender();
+    // ===== START =====
+    renderCalendar();
     updateUI();
 </script>
 

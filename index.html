@@ -53,6 +53,7 @@
         .btn-claim:disabled { background: #ccc; }
         .btn-withdraw { background: #FF9800; color: white; }
         .btn-withdraw:disabled { background: #ccc; }
+        .btn-referral { background: #2196F3; color: white; }
         .saldo {
             background: #fafafa;
             border-radius: 12px;
@@ -62,7 +63,25 @@
         .saldo .label { color: #999; font-size: 13px; }
         .saldo .jumlah { font-size: 32px; font-weight: bold; color: #222; }
         .saldo .jumlah .ton { font-size: 18px; color: #0088CC; }
-        .saldo .rupiah { font-size: 14px; color: #999; }
+        .saldo .usd { font-size: 14px; color: #999; }
+        .referral-box {
+            background: #E3F2FD;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .referral-box .label { color: #1565C0; font-size: 13px; }
+        .referral-box .count { font-size: 24px; font-weight: bold; color: #0D47A1; }
+        .referral-box .reward-info { font-size: 12px; color: #666; }
+        .referral-link {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 8px 0;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +102,16 @@
         <div class="jumlah">
             <span id="saldoTon">0.000</span> <span class="ton">TON</span>
         </div>
-        <div class="rupiah">≈ Rp <span id="saldoRupiah">0</span></div>
+        <div class="usd">$<span id="saldoUsd">0.000</span></div>
+    </div>
+
+    <!-- REFERRAL SECTION -->
+    <div class="referral-box">
+        <div class="label">👥 Referrals</div>
+        <div class="count" id="referralCount">0</div>
+        <div class="reward-info">Rp 1 per referral</div>
+        <div class="referral-link" id="referralLink">Loading referral link...</div>
+        <button class="btn btn-referral" id="tombolReferral">📤 Share Referral Link</button>
     </div>
 
     <button class="btn btn-withdraw" id="tombolWd">💳 Withdraw (Min. 1 TON)</button>
@@ -91,6 +119,7 @@
 </div>
 
 <script>
+    // ========== DATA ==========
     var today = new Date();
     var tgl = today.getDate();
     var bulan = today.getMonth();
@@ -99,7 +128,15 @@
     var saldo = 0;
     var reward = 0.0005;
     var minWd = 1;
+    var referralReward = 0.000000035; // ≈ Rp 1 (1 TON ≈ Rp 28.000)
+    var referralCount = 0;
 
+    // Ambil data dari Telegram Web App
+    var tg = window.Telegram?.WebApp || {};
+    var user = tg.initDataUnsafe?.user || {};
+    var userId = user.id || 'guest';
+
+    // ========== RENDER KALENDER ==========
     function buatKalender() {
         var hari = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         var hariPertama = new Date(tahun, bulan, 1).getDay();
@@ -125,13 +162,20 @@
         document.getElementById('tgl').textContent = today.toLocaleDateString('en-US', opt);
     }
 
+    // ========== UPDATE UI ==========
     function updateUI() {
+        // Saldo TON
         document.getElementById('saldoTon').textContent = saldo.toFixed(3);
-        document.getElementById('saldoRupiah').textContent = (saldo * 28000).toLocaleString('id-ID');
+        // Konversi ke USD (1 TON ≈ $1.65)
+        var usd = saldo * 1.65;
+        document.getElementById('saldoUsd').textContent = usd.toFixed(3);
 
+        // Referral
+        document.getElementById('referralCount').textContent = referralCount;
+
+        // Status Claim
         var status = document.getElementById('status');
         var tombol = document.getElementById('tombolAmbil');
-
         var sudahClaim = false;
         if (sudahClaim) {
             status.textContent = '✅ Today: Already claimed!';
@@ -143,6 +187,7 @@
             tombol.textContent = '🪙 Claim Today\'s Coin';
         }
 
+        // Withdraw
         var btnWd = document.getElementById('tombolWd');
         if (saldo >= minWd) {
             btnWd.disabled = false;
@@ -151,8 +196,13 @@
             btnWd.disabled = true;
             btnWd.textContent = '💳 Withdraw (Min. 1 TON)';
         }
+
+        // Referral Link
+        var link = 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
+        document.getElementById('referralLink').textContent = link;
     }
 
+    // ========== EVENT ==========
     document.getElementById('tombolAmbil').addEventListener('click', function() {
         saldo = saldo + reward;
         updateUI();
@@ -167,8 +217,33 @@
         alert('💳 Withdraw process to TON wallet...');
     });
 
+    document.getElementById('tombolReferral').addEventListener('click', function() {
+        var link = 'https://t.me/CalendarCoinBot/rewards?start=' + userId;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Calendar Coin',
+                text: 'Join Calendar Coin and earn TON! Use my referral link:',
+                url: link
+            });
+        } else {
+            navigator.clipboard.writeText(link).then(function() {
+                alert('✅ Referral link copied! Share it with your friends.');
+            }).catch(function() {
+                prompt('Copy this link:', link);
+            });
+        }
+        // Simulasi referral
+        referralCount = referralCount + 1;
+        saldo = saldo + referralReward;
+        updateUI();
+        alert('🎉 +Rp 1 from referral!');
+    });
+
+    // ========== INIT ==========
     buatKalender();
     updateUI();
+
+    console.log('✅ Calendar Coin ready! User ID:', userId);
 </script>
 
 </body>

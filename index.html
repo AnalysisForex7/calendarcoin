@@ -2,75 +2,541 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendar Coin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DailyCalendar — Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
-<link rel="stylesheet" href="style.css">
+  :root{
+    --bg: #0A0D12;
+    --bg-elevated: #12161E;
+    --bg-card: #171C26;
+    --line: #262C38;
+    --ton: #2AA6FF;
+    --ton-dim: #1C6FA8;
+    --gold: #F2B33D;
+    --gold-dim: #7A5C1E;
+    --green: #3ED598;
+    --red: #FF5C6C;
+    --text: #ECEFF4;
+    --text-dim: #8A93A6;
+    --text-faint: #4C5567;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; padding:0; background:#000; }
+  body{
+    font-family:'Inter', sans-serif;
+    color: var(--text);
+    display:flex; justify-content:center;
+    min-height:100vh;
+  }
+
+  .phone{
+    width:100%; max-width:420px;
+    min-height:100vh;
+    background: var(--bg);
+    position:relative;
+    display:flex; flex-direction:column;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(42,166,255,0.10), transparent 40%),
+      radial-gradient(circle at 90% 8%, rgba(242,179,61,0.07), transparent 35%);
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 18px 10px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:9px;
+    background: linear-gradient(135deg, var(--ton), #7C4DFF);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:700; font-family:'JetBrains Mono';
+  }
+  .brand-name{ font-family:'Space Grotesk'; font-weight:700; font-size:17px; letter-spacing:0.2px; }
+  .brand-sub{ font-family:'JetBrains Mono'; font-size:9.5px; color:var(--text-faint); letter-spacing:0.5px; margin-top:-2px; }
+  .streak-pill{
+    display:flex; align-items:center; gap:5px;
+    background: var(--bg-card); border:1px solid var(--line);
+    padding:6px 10px; border-radius:20px;
+    font-family:'JetBrains Mono'; font-size:12px; font-weight:600; color:var(--gold);
+  }
+
+  .balance-wrap{ padding: 6px 18px 4px; }
+  .balance-label{ font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono'; letter-spacing:0.5px; text-transform:uppercase; }
+  .balance-row{ display:flex; align-items:baseline; gap:8px; margin-top:4px;}
+  .balance-num{ font-family:'Space Grotesk'; font-weight:700; font-size:38px; letter-spacing:-0.5px; }
+  .balance-unit{ font-family:'JetBrains Mono'; font-size:14px; color:var(--gold); font-weight:600; }
+  .balance-note{ font-size:11.5px; color:var(--text-faint); margin-top:4px; line-height:1.5; }
+  .balance-note b{ color:var(--text-dim); font-weight:600; }
+
+  .calendar{
+    margin: 16px 18px 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 14px 16px;
+  }
+  .calendar-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .calendar-title{ font-size:12.5px; font-weight:600; color:var(--text-dim); }
+  .calendar-count{ font-family:'JetBrains Mono'; font-size:11px; color:var(--gold); }
+  .days{ display:flex; gap:6px; }
+  .day{
+    flex:1; aspect-ratio: 1/1.15; border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    background: var(--bg-elevated); border:1px solid var(--line);
+    font-family:'JetBrains Mono'; font-size:9.5px; color:var(--text-faint);
+  }
+  .day.done{ background: linear-gradient(160deg, var(--ton-dim), #12303F); border-color: var(--ton); color:#BEE3FF; }
+  .day.done .dot{ background:var(--ton); }
+  .day.today{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  .day .dot{ width:5px; height:5px; border-radius:50%; background:var(--text-faint); }
+
+  .section-label{
+    margin: 22px 18px 10px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-label h2{ font-family:'Space Grotesk'; font-size:15px; margin:0; font-weight:600; }
+  .section-label span{ font-size:11.5px; color:var(--text-dim); font-family:'JetBrains Mono'; }
+
+  .missions{ padding: 0 18px 100px; display:flex; flex-direction:column; gap:10px; }
+  .mission{
+    display:flex; align-items:center; gap:12px;
+    background: var(--bg-card); border:1px solid var(--line);
+    border-radius: 14px; padding: 13px 14px;
+    cursor:pointer; transition: transform .12s ease, border-color .12s ease;
+  }
+  .mission:active{ transform: scale(0.98); }
+  .mission.locked{ opacity:0.55; }
+  .mission.completed{ border-color: var(--green); background: linear-gradient(90deg, rgba(62,213,152,0.08), rgba(23,28,38,1) 40%); }
+  .m-icon{
+    width:38px; height:38px; border-radius:11px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+    background: var(--bg-elevated); border:1px solid var(--line);
+  }
+  .m-body{ flex:1; min-width:0; }
+  .m-title{ font-size:13.5px; font-weight:600; }
+  .m-sub{ font-size:11px; color:var(--text-dim); margin-top:2px; display:flex; align-items:center; gap:5px; }
+  .m-reward{
+    font-family:'JetBrains Mono'; font-size:12px; font-weight:700; color:var(--gold);
+    white-space:nowrap;
+  }
+  .m-state{
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+    background: var(--bg-elevated); border:1px solid var(--line); color:var(--text-faint);
+  }
+  .m-state.go{ background: var(--ton); border-color:var(--ton); color:#fff; }
+  .m-state.done{ background: var(--green); border-color:var(--green); color:#052; }
+
+  .cap-note{
+    margin: 4px 18px 0; font-size:11px; color:var(--text-faint); line-height:1.6;
+    background: var(--bg-elevated); border:1px dashed var(--line); border-radius:10px; padding:10px 12px;
+  }
+
+  .navbar{
+    position: sticky; bottom:0; left:0; right:0;
+    background: rgba(10,13,18,0.92); backdrop-filter: blur(10px);
+    border-top:1px solid var(--line);
+    display:flex; padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+    margin-top:auto;
+  }
+  .navitem{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+    font-size:10px; color: var(--text-faint); font-family:'JetBrains Mono';
+  }
+  .navitem.active{ color: var(--ton); }
+  .navitem .ic{ font-size:18px; }
+
+  .overlay{
+    position:fixed; inset:0; background:#000;
+    display:none; flex-direction:column; z-index:50;
+    max-width:420px; margin:0 auto;
+  }
+  .overlay.show{ display:flex; }
+  .ad-surface{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: radial-gradient(circle at 50% 30%, #1a2230, #05070a 75%);
+    position:relative;
+  }
+  .ad-badge{
+    position:absolute; top:16px; left:16px;
+    font-family:'JetBrains Mono'; font-size:10px; color:var(--text-faint);
+    border:1px solid var(--line); padding:4px 8px; border-radius:6px;
+  }
+  .ad-ring{
+    width:120px; height:120px; border-radius:50%;
+    border: 4px solid var(--line); border-top-color: var(--ton);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono'; font-size:26px; font-weight:700;
+    animation: spin 1s linear infinite;
+  }
+  .ad-ring span{ display:inline-block; animation: unspin 1s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  @keyframes unspin{ to{ transform: rotate(-360deg); } }
+  .ad-caption{ margin-top:22px; font-size:13px; color:var(--text-dim); text-align:center; padding:0 40px; line-height:1.6; }
+  .ad-caption b{ color:var(--text); }
+  .ad-footer{
+    padding: 16px 18px calc(16px + env(safe-area-inset-bottom));
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:'JetBrains Mono'; font-size:11px; color:var(--text-faint);
+    border-top:1px solid var(--line);
+  }
+  .no-skip{ display:flex; align-items:center; gap:6px; color: var(--red); }
+
+  .toast{
+    position:fixed; left:50%; top:14%; transform:translate(-50%,-20px);
+    background: var(--bg-card); border:1px solid var(--gold);
+    padding: 14px 20px; border-radius: 14px;
+    display:flex; align-items:center; gap:10px;
+    opacity:0; pointer-events:none; transition: all .35s cubic-bezier(.2,.9,.3,1.4);
+    z-index:80; max-width:340px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+  .toast .t-num{ font-family:'JetBrains Mono'; font-weight:700; color:var(--gold); font-size:15px; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .wallet-hero{
+    margin: 6px 18px 4px;
+    background: linear-gradient(150deg, #12233A, #0E1620);
+    border: 1px solid var(--ton-dim);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+  }
+  .wallet-label{ font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono'; letter-spacing:0.5px; text-transform:uppercase; }
+  .wallet-row{ display:flex; align-items:baseline; gap:8px; margin-top:6px; }
+  .wallet-num{ font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-0.3px; }
+  .wallet-unit{ font-family:'JetBrains Mono'; font-size:13px; color:var(--ton); font-weight:600; }
+  .wallet-fiat{ font-size:12px; color:var(--text-faint); margin-top:4px; font-family:'JetBrains Mono'; }
+
+  .progress-wrap{ margin-top:16px; }
+  .progress-labels{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono'; margin-bottom:6px; }
+  .progress-bar{ height:8px; background: var(--bg-elevated); border-radius:5px; overflow:hidden; border:1px solid var(--line); }
+  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--ton), #7C4DFF); border-radius:5px; transition: width .4s ease; }
+
+  .wallet-cta{
+    margin-top:16px; width:100%; padding:12px; border-radius:12px;
+    background: var(--bg-elevated); border:1px solid var(--line);
+    color: var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; font-weight:600;
+    text-align:center;
+  }
+  .wallet-cta.ready{ background: var(--ton); border-color:var(--ton); color:#fff; }
+
+  .wallet-stats{ display:flex; gap:10px; margin:16px 18px; }
+  .stat-card{
+    flex:1; background: var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:12px;
+  }
+  .stat-label{ font-size:10px; color:var(--text-faint); font-family:'JetBrains Mono'; text-transform:uppercase; }
+  .stat-value{ font-family:'Space Grotesk'; font-size:16px; font-weight:700; margin-top:4px; }
+
+  .history{ padding: 0 18px 100px; display:flex; flex-direction:column; gap:8px; }
+  .h-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:11px 13px;
+  }
+  .h-left{ display:flex; align-items:center; gap:10px; }
+  .h-icon{ width:30px; height:30px; border-radius:9px; background:var(--bg-elevated); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; }
+  .h-title{ font-size:12.5px; font-weight:600; }
+  .h-sub{ font-size:10.5px; color:var(--text-faint); margin-top:1px; }
+  .h-amt{ font-family:'JetBrains Mono'; font-size:12px; color:var(--ton); font-weight:700; }
+
+  .info-box{
+    margin: 0 18px 18px; font-size:11px; color:var(--text-faint); line-height:1.6;
+    background: var(--bg-elevated); border:1px dashed var(--line); border-radius:10px; padding:11px 12px;
+  }
+  .info-box b{ color:var(--text-dim); }
+
+  ::-webkit-scrollbar{ display:none; }
+</style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="phone" id="phone">
 
-<h1>🪙 Calendar Coin</h1>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">D</div>
+      <div>
+        <div class="brand-name">DailyCalendar</div>
+        <div class="brand-sub">SEASON 1 · #TON</div>
+      </div>
+    </div>
+    <div class="streak-pill">🔥 <span id="streakTop">12</span> days</div>
+  </div>
 
-<div class="card">
-<h2>Balance</h2>
-<div id="balance" class="balance">0 Coin</div>
+  <div class="view active" id="viewHome">
+    <div class="balance-wrap">
+      <div class="balance-label">Total Airdrop Points</div>
+      <div class="balance-row">
+        <div class="balance-num" id="balanceNum">128,450</div>
+        <div class="balance-unit">PTS</div>
+      </div>
+      <div class="balance-note">Points convert to token allocation at the <b>Token Generation Event</b>. Ad rewards (TON) are paid separately — see the Wallet tab.</div>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar-head">
+        <div class="calendar-title">Daily Claim Streak</div>
+        <div class="calendar-count">7/7 this week</div>
+      </div>
+      <div class="days" id="days"></div>
+    </div>
+
+    <div class="section-label">
+      <h2>Today's Missions</h2>
+      <span id="missionCount">0/6</span>
+    </div>
+
+    <div class="missions" id="missions"></div>
+
+    <div class="cap-note">
+      Each mission needs 1 full ad view (mandatory, no skipping) to unlock. Max <b>6 missions / day</b>, with an automatic cooldown between missions to keep it fair.
+    </div>
+  </div>
+
+  <div class="view" id="viewWallet">
+    <div class="wallet-hero">
+      <div class="wallet-label">Ad Reward Balance (real TON)</div>
+      <div class="wallet-row">
+        <div class="wallet-num" id="tonBalance">0.0043</div>
+        <div class="wallet-unit">TON</div>
+      </div>
+      <div class="wallet-fiat">≈ <span id="tonFiat">Rp 107</span> at current rate</div>
+
+      <div class="progress-wrap">
+        <div class="progress-labels">
+          <span>Progress to withdrawal</span>
+          <span id="progressPct">43%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:43%"></div></div>
+      </div>
+      <div class="wallet-cta" id="walletCta">0.0057 TON to go · min. withdrawal 0.01 TON</div>
+    </div>
+
+    <div class="wallet-stats">
+      <div class="stat-card">
+        <div class="stat-label">Per Ad Watched</div>
+        <div class="stat-value">0.00024 TON</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Your Share</div>
+        <div class="stat-value">30%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Est. Weekly</div>
+        <div class="stat-value">~Rp 250</div>
+      </div>
+    </div>
+
+    <div class="section-label"><h2>Earnings History</h2></div>
+    <div class="history" id="history"></div>
+
+    <div class="info-box">
+      Ad rewards settle from the ad network before payout, so first withdrawal may take a few days after you hit the minimum. This balance is separate from Airdrop Points — it's real TON, paid out weekly in a batch.
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="navitem active" data-view="viewHome"><div class="ic">🏠</div>Home</div>
+    <div class="navitem" data-view="viewHome"><div class="ic">🎯</div>Missions</div>
+    <div class="navitem" data-view="viewHome"><div class="ic">👥</div>Invite</div>
+    <div class="navitem" data-view="viewWallet"><div class="ic">💼</div>Wallet</div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="ad-surface">
+      <div class="ad-badge">AD · 15s</div>
+      <div class="ad-ring"><span id="countdown">15</span></div>
+      <div class="ad-caption">Watch to the end to unlock<br><b id="pendingMissionName">mission</b></div>
+    </div>
+    <div class="ad-footer">
+      <div class="no-skip">⛔ Cannot be skipped</div>
+      <div id="poweredBy">AdsGram</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <div style="font-size:20px;">🎉</div>
+    <div>
+      <div style="font-size:12px;color:var(--text-dim);">Mission complete</div>
+      <div class="t-num" id="toastReward">+2,000 PTS</div>
+    </div>
+  </div>
+
 </div>
 
-<div class="card">
-<h2>⛏ Mining</h2>
-<p>100 Coin / 24 Jam</p>
+<script>
+const missionsData = [
+  { icon:"📅", title:"Daily Claim", sub:"Open the app today", reward:500, state:"done" },
+  { icon:"📢", title:"Subscribe Partner Channel", sub:"@partnerchannel", reward:1500, state:"unlocked" },
+  { icon:"🔁", title:"Try Sponsor App", sub:"Open DeFi X mini app", reward:2000, state:"locked" },
+  { icon:"💧", title:"Testnet Swap", sub:"Small swap on DEX Y", reward:3000, state:"locked" },
+  { icon:"🗳️", title:"Community Vote", sub:"Fill out 1 quick poll", reward:1000, state:"locked" },
+  { icon:"⭐", title:"Weekly Streak Bonus", sub:"Complete 5 missions this week", reward:5000, state:"locked" },
+];
 
-<div id="timer" class="timer">
-Ready
-</div>
+const CPM_TON = 0.8;
+const USER_SHARE = 0.30;
+const TON_PER_AD = (CPM_TON / 1000) * USER_SHARE;
+const MIN_WITHDRAW = 0.01;
+const TON_PRICE_USD = 1.39;
+const USD_IDR = 17850;
 
-<button id="mineBtn">
-Claim
-</button>
+let tonBalance = 0.0043;
+const earningsHistory = [];
 
-</div>
+function fmtTon(n){ return n.toFixed(5).replace(/0+$/,'').replace(/\.$/,'') || '0'; }
+function fmtRp(n){ return 'Rp ' + Math.round(n).toLocaleString('en-US'); }
 
-<div class="card">
-<h2>📺 Watch Ads</h2>
-<p>Reward +5 Coin</p>
+function updateWallet(){
+  document.getElementById('tonBalance').textContent = tonBalance.toFixed(4);
+  const fiat = tonBalance * TON_PRICE_USD * USD_IDR;
+  document.getElementById('tonFiat').textContent = '≈ ' + fmtRp(fiat) + ' at current rate';
 
-<button id="adsBtn">
-Watch Ads
-</button>
+  const pct = Math.min(100, (tonBalance / MIN_WITHDRAW) * 100);
+  document.getElementById('progressPct').textContent = Math.round(pct) + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
 
-</div>
+  const cta = document.getElementById('walletCta');
+  if(tonBalance >= MIN_WITHDRAW){
+    cta.textContent = 'Ready — included in next weekly batch payout';
+    cta.classList.add('ready');
+  } else {
+    const remaining = (MIN_WITHDRAW - tonBalance).toFixed(4);
+    cta.textContent = remaining + ' TON to go · min. withdrawal ' + MIN_WITHDRAW + ' TON';
+    cta.classList.remove('ready');
+  }
+  renderHistory();
+}
 
-<div class="card">
-<h2>📅 Daily Login</h2>
-<p>Reward +5 Coin</p>
+function renderHistory(){
+  const el = document.getElementById('history');
+  el.innerHTML = '';
+  if(earningsHistory.length === 0){
+    el.innerHTML = '<div class="info-box" style="margin:0;">No ad earnings yet today — complete a mission on Home to see it here.</div>';
+    return;
+  }
+  earningsHistory.slice().reverse().forEach(h=>{
+    const row = document.createElement('div');
+    row.className = 'h-row';
+    row.innerHTML = `
+      <div class="h-left">
+        <div class="h-icon">📺</div>
+        <div>
+          <div class="h-title">${h.title}</div>
+          <div class="h-sub">${h.time}</div>
+        </div>
+      </div>
+      <div class="h-amt">+${fmtTon(h.amount)} TON</div>
+    `;
+    el.appendChild(row);
+  });
+}
 
-<button id="dailyBtn">
-Claim Daily
-</button>
+document.querySelectorAll('.navitem').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.navitem').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const target = item.dataset.view;
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(target).classList.add('active');
+  });
+});
 
-</div>
+const daysShort = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const daysEl = document.getElementById('days');
+daysShort.forEach((d,i)=>{
+  const done = i < 5;
+  const isToday = i === 4;
+  const div = document.createElement('div');
+  div.className = 'day' + (done ? ' done' : '') + (isToday ? ' today' : '');
+  div.innerHTML = `<div>${d}</div><div class="dot"></div>`;
+  daysEl.appendChild(div);
+});
 
-<div class="card">
-<h2>💸 Withdraw</h2>
+const missionsEl = document.getElementById('missions');
+let pendingIndex = null;
 
-<p>Minimum 10.000 Coin</p>
+function fmt(n){ return n.toLocaleString('en-US'); }
 
-<button id="withdrawBtn">
-Withdraw
-</button>
+function render(){
+  missionsEl.innerHTML = '';
+  let doneCount = 0;
+  missionsData.forEach((m, idx)=>{
+    if(m.state === 'done') doneCount++;
+    const row = document.createElement('div');
+    row.className = 'mission ' + (m.state === 'locked' ? 'locked' : '') + (m.state === 'done' ? 'completed' : '');
+    let stateHtml = '';
+    if(m.state === 'done') stateHtml = `<div class="m-state done">✓</div>`;
+    else if(m.state === 'unlocked') stateHtml = `<div class="m-state go">▶</div>`;
+    else stateHtml = `<div class="m-state">🔒</div>`;
 
-<p class="small">
-Withdraw akan aktif jika saldo mencapai 10.000 Coin
-</p>
+    row.innerHTML = `
+      <div class="m-icon">${m.icon}</div>
+      <div class="m-body">
+        <div class="m-title">${m.title}</div>
+        <div class="m-sub">${m.sub}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="m-reward">+${fmt(m.reward)}</div>
+        ${stateHtml}
+      </div>
+    `;
+    if(m.state === 'unlocked'){
+      row.addEventListener('click', ()=> startAdGate(idx));
+    }
+    missionsEl.appendChild(row);
+  });
+  document.getElementById('missionCount').textContent = doneCount + '/' + missionsData.length;
+}
 
-</div>
+function startAdGate(idx){
+  pendingIndex = idx;
+  document.getElementById('pendingMissionName').textContent = missionsData[idx].title;
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('show');
+  let t = 15;
+  const cd = document.getElementById('countdown');
+  cd.textContent = t;
+  const timer = setInterval(()=>{
+    t--;
+    cd.textContent = t;
+    if(t <= 0){
+      clearInterval(timer);
+      overlay.classList.remove('show');
+      completeMission(pendingIndex);
+    }
+  }, 200);
+}
 
-</div>
+function completeMission(idx){
+  const m = missionsData[idx];
+  m.state = 'done';
+  const bal = document.getElementById('balanceNum');
+  const current = parseInt(bal.textContent.replace(/,/g,''));
+  bal.textContent = fmt(current + m.reward);
 
-<script src="script.js"></script>
+  tonBalance += TON_PER_AD;
+  earningsHistory.push({ title: m.title, amount: TON_PER_AD, time: 'just now' });
+  updateWallet();
+
+  const toast = document.getElementById('toast');
+  document.getElementById('toastReward').textContent = '+' + fmt(m.reward) + ' PTS  ·  +' + TON_PER_AD.toFixed(5) + ' TON';
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 1800);
+
+  const next = missionsData.findIndex(mm => mm.state === 'locked');
+  if(next !== -1){
+    setTimeout(()=>{ missionsData[next].state = 'unlocked'; render(); }, 900);
+  }
+  render();
+}
+
+render();
+updateWallet();
+</script>
 
 </body>
 </html>

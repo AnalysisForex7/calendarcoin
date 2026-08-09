@@ -15,6 +15,8 @@
     --line: #262C38;
     --ton: #2AA6FF;
     --ton-dim: #1C6FA8;
+    --purple: #8B6CFF;
+    --purple-dim: #4B3699;
     --gold: #F2B33D;
     --gold-dim: #7A5C1E;
     --gold-deep: #8a5a12;
@@ -69,35 +71,68 @@
   .icon{ width:18px; height:18px; stroke: currentColor; stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; display:block; }
   .icon-sm{ width:15px; height:15px; }
 
-  /* ---------- decorative candlestick chart strip (pure CSS, generic motif) ---------- */
+  /* ---------- SCENE: taman siang + elemen kripto (matahari=koin, awan, partikel, node) ---------- */
   .chart-hero{
     position:relative;
     padding: 16px 18px 4px;
     overflow:hidden;
-    background:
-      radial-gradient(circle at 30% 0%, rgba(242,179,61,0.10), transparent 45%),
-      radial-gradient(circle at 85% 10%, rgba(42,166,255,0.08), transparent 40%),
-      #0A0D12;
+    background: linear-gradient(180deg, #2AA6FF 0%, #6FC3FF 34%, #BFE6FF 58%, #E9F6FF 74%, #0A0D12 100%);
   }
+  .chart-hero .sky-nodes{ position:absolute; top:0; left:0; width:100%; height:120px; opacity:0.5; z-index:0; }
+  .chart-hero .sky-nodes .link{ stroke:rgba(255,255,255,0.6); stroke-width:1; animation: linkfade 3s ease-in-out infinite; }
+  .chart-hero .sky-nodes .link.l2{ animation-delay:-1s; }
+  .chart-hero .sky-nodes .link.l3{ animation-delay:-2s; }
+  .chart-hero .sky-nodes circle{ fill:#fff; }
+  .chart-hero .sky-nodes circle.gold{ fill:var(--gold); }
+  .chart-hero .sky-nodes circle.purple{ fill:var(--purple); }
+  @keyframes linkfade{ 0%,100%{ opacity:0.25; } 50%{ opacity:0.85; } }
+
+  .sun-coin{
+    position:absolute; top:14px; right:22px; width:46px; height:46px; border-radius:50%; z-index:1;
+    background: radial-gradient(circle at 35% 30%, #FFF6D8, var(--gold) 55%, #B4791E 100%);
+    box-shadow: 0 0 34px 10px rgba(242,179,61,0.55);
+    display:flex; align-items:center; justify-content:center;
+    animation: suncoin-pulse 4s ease-in-out infinite, suncoin-spin 16s linear infinite;
+  }
+  .sun-coin::before{ content:""; position:absolute; inset:4px; border-radius:50%; border:1.5px dashed rgba(255,255,255,0.6); }
+  .sun-coin span{ font-family:'JetBrains Mono'; font-weight:700; font-size:10px; color:#7A4E10; }
+  @keyframes suncoin-pulse{ 0%,100%{ box-shadow:0 0 34px 10px rgba(242,179,61,0.55); } 50%{ box-shadow:0 0 44px 14px rgba(242,179,61,0.75); } }
+  @keyframes suncoin-spin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+
+  .hcloud{ position:absolute; background:#fff; border-radius:50px; opacity:0.85; z-index:1; }
+  .hcloud::before,.hcloud::after{ content:''; position:absolute; background:inherit; border-radius:50%; }
+  .hc1{ width:46px; height:13px; top:26px; left:-60px; animation: hdrift 22s linear infinite; }
+  .hc1::before{ width:20px; height:20px; top:-9px; left:5px; }
+  .hc1::after{ width:15px; height:15px; top:-6px; left:20px; }
+  .hc2{ width:34px; height:10px; top:52px; left:-50px; opacity:0.7; animation: hdrift 30s linear infinite; animation-delay:-8s; }
+  .hc2::before{ width:14px; height:14px; top:-7px; left:4px; }
+  .hc2::after{ width:11px; height:11px; top:-5px; left:16px; }
+  @keyframes hdrift{ from{ transform:translateX(0); } to{ transform:translateX(340px); } }
+
+  .hparticle{ position:absolute; bottom:0; width:3.5px; height:3.5px; border-radius:50%; opacity:0; z-index:1; animation: hrise 5s ease-in infinite; }
+  .hp-gold{ background:var(--gold); box-shadow:0 0 5px var(--gold); }
+  .hp-purple{ background:var(--purple); box-shadow:0 0 5px var(--purple); }
+  .hp-green{ background:var(--green); box-shadow:0 0 5px var(--green); }
+  @keyframes hrise{
+    0%{ opacity:0; transform: translateY(0) scale(0.6); }
+    15%{ opacity:1; }
+    85%{ opacity:0.7; }
+    100%{ opacity:0; transform: translateY(-130px) scale(1.1); }
+  }
+
   .chart-hero::before{
     content:"";
-    position:absolute; inset:0;
-    background-image: repeating-linear-gradient(
-      90deg,
-      rgba(255,92,108,0.16) 0px, rgba(255,92,108,0.16) 3px, transparent 3px, transparent 9px,
-      rgba(62,213,152,0.14) 9px, rgba(62,213,152,0.14) 12px, transparent 12px, transparent 20px
-    );
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 85%);
-    opacity:0.55;
-    pointer-events:none;
+    position:absolute; left:0; right:0; bottom:0; height:40%;
+    background: linear-gradient(180deg, transparent, var(--bg));
+    z-index:1; pointer-events:none;
   }
-  .chart-hero > *{ position:relative; z-index:1; }
+  .chart-hero > *:not(.sky-nodes):not(.sun-coin):not(.hcloud):not(.hparticle){ position:relative; z-index:2; }
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; }
   .brand{ display:flex; align-items:center; gap:9px; }
   .brand-mark{
     width:30px; height:30px; border-radius:9px;
-    background: linear-gradient(135deg, var(--ton), #7C4DFF);
+    background: linear-gradient(135deg, var(--ton), var(--purple));
     display:flex; align-items:center; justify-content:center;
     font-size:15px; font-weight:700; font-family:'JetBrains Mono';
   }
@@ -112,7 +147,7 @@
 
   .status-row{ display:flex; align-items:center; gap:8px; margin-top:14px; }
   .lvl-pill{
-    background:#fff; color:#0A0D12; font-family:'Space Grotesk'; font-weight:700; font-size:12.5px;
+    background: var(--purple); color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:12.5px;
     padding:6px 12px; border-radius:20px;
   }
   .idle-pill{
@@ -133,7 +168,6 @@
     font-family:'Space Grotesk'; font-weight:600; font-size:12.5px;
     cursor:pointer;
   }
-  .connect-btn.connected{ background: var(--bg-card); border:1px solid var(--green); color:var(--green); }
   .lvl-note{
     margin-top:8px; display:inline-block;
     font-family:'JetBrains Mono'; font-size:11px; color:var(--green);
@@ -169,25 +203,27 @@
     width:190px; height:190px; border-radius:50%;
     position:relative;
     background:
-      radial-gradient(circle at 35% 28%, #FFE9A8, #F2B33D 38%, #B9791E 72%, #7A5410 100%);
-    border: 6px solid #FFE9A8;
-    box-shadow: 0 0 0 3px #8a5a12, 0 18px 44px rgba(242,179,61,0.28), 0 4px 10px rgba(0,0,0,0.4), inset 0 4px 14px rgba(255,255,255,0.35), inset 0 -10px 24px rgba(0,0,0,0.35);
+      radial-gradient(circle at 35% 28%, #D9CCFF, var(--purple) 38%, #5A3FC9 72%, #38267A 100%);
+    border: 6px solid #D9CCFF;
+    box-shadow: 0 0 0 3px #4B3699, 0 18px 44px rgba(139,108,255,0.32), 0 4px 10px rgba(0,0,0,0.4), inset 0 4px 14px rgba(255,255,255,0.3), inset 0 -10px 24px rgba(0,0,0,0.35);
     display:flex; align-items:center; justify-content:center;
     transition: transform .15s ease;
+    animation: coinfloat 3.4s ease-in-out infinite;
   }
+  @keyframes coinfloat{ 0%,100%{ transform: translateY(0) rotateZ(-1.5deg);} 50%{ transform: translateY(-7px) rotateZ(1.5deg);} }
   .coin::before{
     content:"";
     position:absolute; inset:-9px; border-radius:50%;
-    background: repeating-conic-gradient(#c98f2e 0deg 4deg, #7a5410 4deg 8deg);
+    background: repeating-conic-gradient(#7458D6 0deg 4deg, #38267A 4deg 8deg);
     z-index:-1;
   }
   .coin::after{
     content:"";
     position:absolute; inset:10px; border-radius:50%;
-    border: 1.5px solid rgba(122,84,16,0.55);
+    border: 1.5px dashed rgba(217,204,255,0.55);
   }
 
-  .calendar, .mission, .wallet-hero, .boost-row, .stat-card, .h-row, .mining-card{
+  .calendar, .mission, .wallet-hero, .boost-row, .stat-card, .h-row, .mining-card, .vintage-cal{
     box-shadow: 0 4px 14px rgba(0,0,0,0.28);
   }
   .wallet-chip, .idle-pill, .lvl-pill, .streak-pill, .gain-pill{
@@ -196,7 +232,7 @@
   .coin.spin{ animation: coinspin 0.9s linear infinite; }
   @keyframes coinspin{ 0%{ transform:rotateY(0deg); } 100%{ transform:rotateY(360deg); } }
   .coin-letter{
-    font-family:'Space Grotesk'; font-weight:700; font-size:38px; color:#6b4a12;
+    font-family:'Space Grotesk'; font-weight:700; font-size:38px; color:#2E1E66;
     text-shadow: 0 2px 0 rgba(255,255,255,0.25);
     letter-spacing:-0.5px;
   }
@@ -215,30 +251,39 @@
     color:#FCE7B3; font-family:'Space Grotesk'; font-weight:700; font-size:15px; letter-spacing:1px;
     text-align:center; cursor:pointer;
   }
-  .mine-btn.mining{ background: linear-gradient(180deg, #1C6FA8, #123A55); border-color:var(--ton-dim); color:#BEE3FF; cursor:default; }
+  .mine-btn.mining{ background: linear-gradient(180deg, var(--purple-dim), #2B1D66); border-color:var(--purple); color:#E6DCFF; cursor:default; }
   .mine-btn.ready{ background: linear-gradient(180deg, var(--green), #1E8A5E); border-color:var(--green); color:#06281a; }
+  .mine-btn.locked{ background: var(--bg-elevated); border-color: var(--line); color: var(--text-faint); cursor:not-allowed; }
 
-  .calendar{
+  .tap-note{ text-align:center; margin: 8px 18px 0; font-family:'JetBrains Mono'; font-size:10.5px; color:var(--text-faint); }
+  .tap-note b{ color: var(--purple); }
+
+  /* ---------- kalender vintage (streak harian) ---------- */
+  .vintage-cal{
     margin: 18px 18px 4px;
-    background: var(--bg-card);
-    border: 1px solid var(--line);
+    background: #F3EBDA;
     border-radius: var(--radius);
-    padding: 14px 14px 16px;
+    padding: 0;
+    overflow:hidden;
+    position:relative;
+    color:#2A2118;
   }
-  .calendar-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .calendar-title{ font-size:12.5px; font-weight:600; color:var(--text-dim); }
-  .calendar-count{ font-family:'JetBrains Mono'; font-size:11px; color:var(--gold); }
-  .days{ display:flex; gap:6px; }
-  .day{
+  .vintage-cal .rings{ position:absolute; top:-8px; left:0; right:0; display:flex; justify-content:space-around; padding:0 24px; }
+  .vintage-cal .rings div{ width:13px; height:17px; border-radius:6px; background:#8a8a8a; box-shadow: inset 0 0 0 3px var(--bg); }
+  .vintage-cal .band{
+    background:#B23A2E; color:#fff; display:flex; align-items:center; justify-content:space-between;
+    font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    padding:8px 14px 6px; margin-top:9px; font-family:'JetBrains Mono';
+  }
+  .vintage-cal .days{ display:flex; gap:6px; padding: 12px 12px 14px; }
+  .vintage-cal .day{
     flex:1; aspect-ratio: 1/1.15; border-radius:10px;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-    background: var(--bg-elevated); border:1px solid var(--line);
-    font-family:'JetBrains Mono'; font-size:9.5px; color:var(--text-faint);
+    background: #E4D8BE; border:1px solid rgba(0,0,0,0.06);
+    font-family:'JetBrains Mono'; font-size:9.5px; color:#8a7a5f; font-weight:700;
   }
-  .day.done{ background: linear-gradient(160deg, var(--ton-dim), #12303F); border-color: var(--ton); color:#BEE3FF; }
-  .day.done .dot{ background:var(--ton); }
-  .day.today{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-  .day .dot{ width:5px; height:5px; border-radius:50%; background:var(--text-faint); }
+  .vintage-cal .day.done{ background: var(--purple); border-color: var(--purple); color:#fff; }
+  .vintage-cal .day.today{ background: var(--gold); border-color: var(--gold); color:#3a2a06; box-shadow: 0 0 0 2px #fff inset; }
 
   .section-label{ margin: 22px 18px 10px; display:flex; align-items:center; justify-content:space-between; }
   .section-label h2{ font-family:'Space Grotesk'; font-size:15px; margin:0; font-weight:600; }
@@ -286,6 +331,7 @@
   .navitem{
     flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
     font-size:9.5px; color: var(--text-faint); font-family:'JetBrains Mono';
+    background:none; border:none;
   }
   .navitem.active{ color: var(--gold); }
   .navitem .ic{ font-size:18px; }
@@ -308,7 +354,7 @@
   }
   .ad-ring{
     width:120px; height:120px; border-radius:50%;
-    border: 4px solid var(--line); border-top-color: var(--ton);
+    border: 4px solid var(--line); border-top-color: var(--purple);
     display:flex; align-items:center; justify-content:center;
     font-family:'JetBrains Mono'; font-size:26px; font-weight:700;
     animation: spin 1s linear infinite;
@@ -342,42 +388,21 @@
 
   .wallet-hero{
     margin: 6px 18px 4px;
-    background: linear-gradient(150deg, #12233A, #0E1620);
-    border: 1px solid var(--ton-dim);
+    background: linear-gradient(150deg, #241C42, #12161E);
+    border: 1px solid var(--purple-dim);
     border-radius: var(--radius);
     padding: 20px 18px;
   }
   .wallet-label{ font-size:11px; color:var(--text-dim); font-family:'JetBrains Mono'; letter-spacing:0.5px; text-transform:uppercase; }
   .wallet-row{ display:flex; align-items:baseline; gap:8px; margin-top:6px; }
   .wallet-num{ font-family:'Space Grotesk'; font-weight:700; font-size:30px; letter-spacing:-0.3px; }
-  .wallet-unit{ font-family:'JetBrains Mono'; font-size:13px; color:var(--ton); font-weight:600; }
+  .wallet-unit{ font-family:'JetBrains Mono'; font-size:13px; color:var(--purple); font-weight:600; }
   .wallet-fiat{ font-size:12px; color:var(--text-faint); margin-top:4px; font-family:'JetBrains Mono'; }
-
-  .progress-wrap{ margin-top:16px; }
-  .progress-labels{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono'; margin-bottom:6px; }
-  .progress-bar{ height:8px; background: var(--bg-elevated); border-radius:5px; overflow:hidden; border:1px solid var(--line); }
-  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--ton), #7C4DFF); border-radius:5px; transition: width .4s ease; }
-
-  .wallet-cta{
-    margin-top:16px; width:100%; padding:12px; border-radius:12px;
-    background: var(--bg-elevated); border:1px solid var(--line);
-    color: var(--text-faint); font-family:'JetBrains Mono'; font-size:12px; font-weight:600;
-    text-align:center;
-  }
-  .wallet-cta.ready{ background: var(--ton); border-color:var(--ton); color:#fff; }
 
   .wallet-stats{ display:flex; gap:10px; margin:16px 18px; }
   .stat-card{ flex:1; background: var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:12px; }
   .stat-label{ font-size:10px; color:var(--text-faint); font-family:'JetBrains Mono'; text-transform:uppercase; }
   .stat-value{ font-family:'Space Grotesk'; font-size:16px; font-weight:700; margin-top:4px; }
-
-  .history{ padding: 0 18px 100px; display:flex; flex-direction:column; gap:8px; }
-  .h-row{ display:flex; align-items:center; justify-content:space-between; background: var(--bg-card); border:1px solid var(--line); border-radius:12px; padding:11px 13px; }
-  .h-left{ display:flex; align-items:center; gap:10px; }
-  .h-icon{ width:30px; height:30px; border-radius:9px; background:var(--bg-elevated); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:13px; }
-  .h-title{ font-size:12.5px; font-weight:600; }
-  .h-sub{ font-size:10.5px; color:var(--text-faint); margin-top:1px; }
-  .h-amt{ font-family:'JetBrains Mono'; font-size:12px; color:var(--ton); font-weight:700; }
 
   .info-box{
     margin: 0 18px 18px; font-size:11px; color:var(--text-faint); line-height:1.6;
@@ -385,17 +410,19 @@
   }
   .info-box b{ color:var(--text-dim); }
 
-  .boost-row{
-    display:flex; align-items:center; gap:12px;
+  .placeholder-wrap{ padding: 60px 30px 120px; text-align:center; }
+  .placeholder-icon{
+    width:74px; height:74px; margin:0 auto 18px; border-radius:22px;
     background: var(--bg-card); border:1px solid var(--line);
-    border-radius:14px; padding:13px 14px; margin: 0 18px 10px;
-    opacity:0.6;
+    display:flex; align-items:center; justify-content:center; font-size:32px;
   }
-  .boost-icon{ width:38px;height:38px;border-radius:11px;background:var(--bg-elevated);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px; flex-shrink:0;}
-  .boost-body{ flex:1; }
-  .boost-title{ font-size:13px; font-weight:600; }
-  .boost-sub{ font-size:10.5px; color:var(--text-faint); margin-top:2px; }
-  .boost-lock{ font-size:11px; color:var(--text-faint); font-family:'JetBrains Mono'; }
+  .placeholder-title{ font-family:'Space Grotesk'; font-size:17px; font-weight:700; }
+  .placeholder-sub{ font-size:12.5px; color:var(--text-dim); margin-top:8px; line-height:1.6; }
+  .placeholder-tag{
+    display:inline-block; margin-top:16px; font-family:'JetBrains Mono'; font-size:10.5px;
+    color: var(--purple); background: rgba(139,108,255,0.1); border:1px solid rgba(139,108,255,0.35);
+    padding:5px 12px; border-radius:20px;
+  }
 
   ::-webkit-scrollbar{ display:none; }
 </style>
@@ -412,480 +439,480 @@
     </div>
   </div>
 
-  <div class="chart-hero">
-    <div class="topbar">
-      <div class="brand">
-        <div class="brand-mark">D</div>
-        <div>
-          <div class="brand-name">DailyCalendar</div>
-          <div class="brand-sub">SEASON 1 · #TON</div>
+  <!-- ===================== VIEW: MINE ===================== -->
+  <div class="view active" id="view-mine">
+    <div class="chart-hero">
+      <svg class="sky-nodes" viewBox="0 0 300 120">
+        <line class="link" x1="25" y1="18" x2="80" y2="42"/>
+        <line class="link l2" x1="80" y1="42" x2="150" y2="14"/>
+        <line class="link l3" x1="150" y1="14" x2="205" y2="46"/>
+        <line class="link" x1="55" y1="65" x2="110" y2="38"/>
+        <circle class="purple" cx="25" cy="18" r="2.6"/>
+        <circle cx="80" cy="42" r="2.2"/>
+        <circle class="gold" cx="150" cy="14" r="2.6"/>
+        <circle cx="205" cy="46" r="2.2"/>
+        <circle class="purple" cx="55" cy="65" r="2.2"/>
+      </svg>
+      <div class="sun-coin"><span>DCR</span></div>
+      <div class="hcloud hc1"></div>
+      <div class="hcloud hc2"></div>
+      <div class="hparticle hp-gold" style="left:30px; animation-delay:0s;"></div>
+      <div class="hparticle hp-purple" style="left:90px; animation-delay:-1.6s;"></div>
+      <div class="hparticle hp-green" style="left:160px; animation-delay:-3.1s;"></div>
+      <div class="hparticle hp-gold" style="left:220px; animation-delay:-0.8s;"></div>
+      <div class="hparticle hp-purple" style="left:260px; animation-delay:-2.4s;"></div>
+
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+          <div>
+            <div class="brand-name">DailyCalendar</div>
+            <div class="brand-sub">SEASON 1 · #TON</div>
+          </div>
+        </div>
+        <div class="streak-pill">🔥 <span id="streakTop">0</span> hari</div>
+      </div>
+
+      <div class="status-row">
+        <div class="lvl-pill" id="lvlPill">Lvl 1</div>
+        <div class="idle-pill" id="statusPill"><div class="dot"></div><span id="statusText">IDLE</span></div>
+      </div>
+      <div class="lvl-note" id="lvlNote">Mulai mining buat dapat PTS pertama kamu</div>
+
+      <div class="assets-wrap">
+        <div class="assets-label">Assets</div>
+        <div class="assets-row">
+          <div class="assets-num" id="assetsNum">0</div>
+          <div class="assets-unit">PTS</div>
         </div>
       </div>
-      <div class="streak-pill">🔥 <span id="streakTop">12</span> days</div>
-    </div>
 
-    <div class="status-row">
-      <div class="lvl-pill" id="lvlPill">Lvl 1</div>
-      <div class="idle-pill" id="statusPill"><div class="dot"></div><span id="statusText">IDLE</span></div>
-    </div>
-    <div class="lvl-note" id="lvlNote">1,250 PTS to next level</div>
+      <div class="wallet-chips">
+        <div class="wallet-chip">HOLDING WALLET: <b id="holdingNum">0</b> PTS</div>
+        <div class="wallet-chip pool">POOL WALLET: <b id="poolNum">0</b> PTS</div>
+      </div>
 
-    <div class="assets-wrap">
-      <div class="assets-label">Assets</div>
-      <div class="assets-row">
-        <div class="assets-num" id="assetsNum">0.0000</div>
-        <div class="assets-unit">PTS</div>
+      <div class="gain-pill" id="gainPill" style="display:none;">+0.0000/detik</div>
+
+      <div class="coin-wrap">
+        <div class="coin" id="coinEl">
+          <div class="coin-letter">DCR</div>
+        </div>
+        <div class="mascot-help">💬</div>
       </div>
     </div>
 
-    <div class="wallet-chips">
-      <div class="wallet-chip">HOLDING WALLET: <b id="holdingNum">0</b> PTS</div>
-      <div class="wallet-chip pool">POOL WALLET: <b id="poolNum">0.0000</b> PTS</div>
+    <div class="mine-btn" id="mineBtn">START MINING</div>
+    <div class="tap-note">Sesi tap hari ini: <b id="tapNote">0/3</b> · 1 sesi = 8 jam</div>
+
+    <div class="vintage-cal">
+      <div class="rings"><div></div><div></div><div></div><div></div><div></div></div>
+      <div class="band"><span>Daily Streak</span><span id="calMonth">—</span></div>
+      <div class="days" id="calDays"></div>
     </div>
 
-    <div class="gain-pill" id="gainPill">+0.0000</div>
-
-    <div class="coin-wrap">
-      <div class="coin" id="coin"><div class="coin-letter">DCR</div></div>
-      <div class="mascot-help" id="mascotHelp">🐶</div>
-    </div>
+    <div class="section-label"><h2>Tugas Harian</h2><span id="taskCountLabel">0/3</span></div>
+    <div class="missions" id="missionList"></div>
   </div>
 
-  <div class="view active" id="viewMine">
-    <div class="mine-btn" id="mineBtn">START</div>
-
-    <div class="calendar">
-      <div class="calendar-head">
-        <div class="calendar-title">Daily Claim Streak</div>
-        <div class="calendar-count">7/7 this week</div>
-      </div>
-      <div class="days" id="days"></div>
-    </div>
-
-    <div class="cap-note">
-      Starting and claiming each mining session needs 1 full ad view (mandatory, no skipping). Assets shown are in-app points only — no value, rate, or date is promised anywhere in this app.
-    </div>
+  <!-- ===================== VIEW: TASKS ===================== -->
+  <div class="view" id="view-tasks">
+    <div class="section-label" style="margin-top:20px;"><h2>Semua Tugas</h2></div>
+    <div class="missions" id="missionListFull"></div>
+    <div class="cap-note">Setiap klaim reward tugas wajib menonton iklan 15 detik terlebih dahulu. Reward tidak mengikat jadwal atau nilai konversi tertentu.</div>
   </div>
 
-  <div class="view" id="viewTasks">
-    <div class="section-label"><h2>Today's Tasks</h2><span id="missionCount">0/6</span></div>
-    <div class="missions" id="missions"></div>
-  </div>
-
-  <div class="view" id="viewMiners">
-    <div class="section-label"><h2>Miners &amp; Boosts</h2></div>
-    <div class="boost-row"><div class="boost-icon">⚡</div><div class="boost-body"><div class="boost-title">Speed Boost</div><div class="boost-sub">Increase pool accrual rate</div></div><div class="boost-lock">🔒 soon</div></div>
-    <div class="boost-row"><div class="boost-icon">🤝</div><div class="boost-body"><div class="boost-title">Hire a Miner</div><div class="boost-sub">Passive background accrual</div></div><div class="boost-lock">🔒 soon</div></div>
-    <div class="boost-row"><div class="boost-icon">🔋</div><div class="boost-body"><div class="boost-title">Extra Session Slot</div><div class="boost-sub">Run a second session per day</div></div><div class="boost-lock">🔒 soon</div></div>
-    <div class="info-box" style="margin:16px 18px;">Boosts are still in development and not yet confirmed. Nothing here is guaranteed to ship.</div>
-  </div>
-
-  <div class="view" id="viewFriends">
-    <div class="section-label"><h2>Invite Friends</h2></div>
-    <div class="info-box" style="margin:0 18px;">
-      Referral features are still in development and not yet confirmed. Nothing is guaranteed — if anything ships, details will be posted here first.
+  <!-- ===================== VIEW: MINERS (placeholder) ===================== -->
+  <div class="view" id="view-miners">
+    <div class="placeholder-wrap">
+      <div class="placeholder-icon">⛏️</div>
+      <div class="placeholder-title">Miners — Coming Soon</div>
+      <div class="placeholder-sub">Boost kecepatan mining, hire miner tambahan, dan slot ekstra bakal muncul di sini.</div>
+      <div class="placeholder-tag">SEGERA HADIR</div>
     </div>
   </div>
 
-  <div class="view" id="viewProfile">
+  <!-- ===================== VIEW: FRIENDS (placeholder) ===================== -->
+  <div class="view" id="view-friends">
+    <div class="placeholder-wrap">
+      <div class="placeholder-icon">👥</div>
+      <div class="placeholder-title">Friends — Coming Soon</div>
+      <div class="placeholder-sub">Ajak teman dan dapat bonus referral. Fitur ini masih dalam pengembangan.</div>
+      <div class="placeholder-tag">SEGERA HADIR</div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: PROFILE ===================== -->
+  <div class="view" id="view-profile">
     <div class="wallet-hero">
-      <div class="wallet-label">Ad Reward Balance (real TON)</div>
+      <div class="wallet-label">Total Holding</div>
       <div class="wallet-row">
-        <div class="wallet-num" id="tonBalance">0.0043</div>
-        <div class="wallet-unit">TON</div>
+        <div class="wallet-num" id="profileHolding">0</div>
+        <div class="wallet-unit">PTS</div>
       </div>
-      <div class="wallet-fiat">≈ <span id="tonFiat">Rp 107</span> at current rate</div>
-
-      <div class="progress-wrap">
-        <div class="progress-labels">
-          <span>Progress to withdrawal</span>
-          <span id="progressPct">43%</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:43%"></div></div>
-      </div>
-      <div class="wallet-cta" id="walletCta">0.0057 TON to go · min. withdrawal 0.01 TON</div>
+      <div class="wallet-fiat">Poin belum bisa dikonversi ke aset apa pun saat ini.</div>
     </div>
-
     <div class="wallet-stats">
-      <div class="stat-card"><div class="stat-label">Per Ad Watched</div><div class="stat-value">0.00024 TON</div></div>
-      <div class="stat-card"><div class="stat-label">Your Share</div><div class="stat-value">30%</div></div>
-      <div class="stat-card"><div class="stat-label">Est. Weekly</div><div class="stat-value">~Rp 250</div></div>
+      <div class="stat-card"><div class="stat-label">Level</div><div class="stat-value" id="profileLevel">1</div></div>
+      <div class="stat-card"><div class="stat-label">Streak</div><div class="stat-value" id="profileStreak">0 hari</div></div>
     </div>
-
-    <div class="section-label"><h2>Earnings History</h2></div>
-    <div class="history" id="history"></div>
-
-    <div class="info-box">
-      Ad rewards settle from the ad network before payout, so timing can vary and is not guaranteed. This balance is separate from Airdrop Points and reflects actual ad revenue share only.
-    </div>
+    <div class="info-box"><b>Catatan:</b> DailyCalendar tidak menjanjikan tanggal listing token, jadwal payout, atau nilai konversi tertentu. Semua poin bersifat in-app dan dapat berubah sesuai kebijakan yang berlaku.</div>
   </div>
 
   <div class="navbar">
-    <div class="navitem active" data-view="viewMine">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>Mine
-    </div>
-    <div class="navitem" data-view="viewTasks">
-      <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Tasks
-    </div>
-    <div class="navitem" data-view="viewMiners">
-      <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="7" width="14" height="12" rx="2"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h.01M15 12h.01"/></svg>Miners
-    </div>
-    <div class="navitem" data-view="viewFriends">
-      <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.6"/><path d="M15.8 14.3c2.7.4 4.7 2.4 4.7 5.2"/></svg>Friends
-    </div>
-    <div class="navitem" data-view="viewProfile">
-      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4.1 3.4-7 7.5-7s7.5 2.9 7.5 7"/></svg>Profile
-    </div>
-  </div>
-
-  <div class="overlay" id="overlay">
-    <div class="ad-surface">
-      <div class="ad-badge">AD · 15s</div>
-      <div class="ad-ring"><span id="countdown">15</span></div>
-      <div class="ad-caption">Watch to the end to unlock<br><b id="pendingMissionName">action</b></div>
-    </div>
-    <div class="ad-footer">
-      <div class="no-skip">⛔ Cannot be skipped</div>
-      <div id="poweredBy">AdsGram</div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast">
-    <div style="font-size:20px;">🎉</div>
-    <div>
-      <div style="font-size:12px;color:var(--text-dim);">Reward claimed</div>
-      <div class="t-num" id="toastReward">+2,000 PTS</div>
-    </div>
+    <button class="navitem active" data-view="mine"><span class="ic">⛏️</span>Mine</button>
+    <button class="navitem" data-view="tasks"><span class="ic">✅</span>Tasks</button>
+    <button class="navitem" data-view="miners"><span class="ic">🤖</span>Miners</button>
+    <button class="navitem" data-view="friends"><span class="ic">👥</span>Friends</button>
+    <button class="navitem" data-view="profile"><span class="ic">👤</span>Profile</button>
   </div>
 
 </div>
 
+<!-- ===================== AD OVERLAY (wajib untuk semua reward) ===================== -->
+<div class="overlay" id="adOverlay">
+  <div class="ad-surface">
+    <div class="ad-badge">IKLAN</div>
+    <div class="ad-ring"><span id="adCountdown">15</span></div>
+    <div class="ad-caption"><b id="adLabel">Memuat reward…</b><br>Tonton sampai selesai untuk melanjutkan.</div>
+  </div>
+  <div class="ad-footer">
+    <div class="no-skip">● Tidak bisa dilewati</div>
+    <div id="adTimerText">00:15</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div>🎉</div>
+  <div><div style="font-size:12px;color:var(--text-dim);">Berhasil diklaim</div><div class="t-num" id="toastNum">+0 PTS</div></div>
+</div>
+
 <script>
-if(window.Telegram && window.Telegram.WebApp){
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-  try { tg.setHeaderColor('#0A0D12'); } catch(e){}
-  try { tg.setBackgroundColor('#0A0D12'); } catch(e){}
-  try { tg.disableVerticalSwipes(); } catch(e){}
+/* ==================================================================
+   KONFIGURASI PRODUKSI — semua durasi dalam DETIK
+   ================================================================== */
+const CONFIG = {
+  SESSION_DURATION_SECONDS: 28800,   // 1 sesi mining = 8 jam (28.800 detik)
+  SESSION_REWARD_PTS: 77778,         // flat per sesi -> 90 sesi/bulan ≈ 7.000.020 PTS
+  MAX_TAPS_PER_WINDOW: 3,            // maksimal 3x start mining
+  WINDOW_SECONDS: 86400,             // dalam rolling window 24 jam (86.400 detik) dari tap pertama
+  AD_DURATION_SECONDS: 15            // iklan non-skip wajib sebelum reward apa pun
+};
+
+/* ==================================================================
+   STATE (localStorage — prototype; produksi sebaiknya divalidasi backend)
+   ================================================================== */
+const state = {
+  holding: load('dc_holding', 0),
+  pool: load('dc_pool', 0),
+  level: load('dc_level', 1),
+  streak: load('dc_streak', 0),
+  tapTimestamps: load('dc_taps', []),      // array epoch ms, tap 'start mining'
+  miningEndAt: load('dc_mining_end', null),// epoch ms saat sesi selesai, null = tidak mining
+  calendarDone: load('dc_cal_done', {}),   // { 'YYYY-MM-DD': true }
+  missionsDone: load('dc_missions_done', {})
+};
+
+function load(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw !== null ? JSON.parse(raw) : fallback;
+  }catch(e){ return fallback; }
+}
+function save(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){}
+}
+function persistAll(){
+  save('dc_holding', state.holding);
+  save('dc_pool', state.pool);
+  save('dc_level', state.level);
+  save('dc_streak', state.streak);
+  save('dc_taps', state.tapTimestamps);
+  save('dc_mining_end', state.miningEndAt);
+  save('dc_cal_done', state.calendarDone);
+  save('dc_missions_done', state.missionsDone);
 }
 
-/* ---------------------------------------------------------
-   ECONOMY CONSTANTS
---------------------------------------------------------- */
-const CPM_TON = 0.8;
-const USER_SHARE = 0.30;
-const TON_PER_AD = (CPM_TON / 1000) * USER_SHARE;
-const MIN_WITHDRAW = 0.01;
-const TON_PRICE_USD = 1.39;
-const USD_IDR = 17850;
+/* ==================================================================
+   requireAd(label, callback) — SEMUA aksi reward wajib lewat sini
+   ================================================================== */
+const adOverlay = document.getElementById('adOverlay');
+const adLabel = document.getElementById('adLabel');
+const adCountdown = document.getElementById('adCountdown');
+const adTimerText = document.getElementById('adTimerText');
+let adInterval = null;
 
-// Demo-length mining session so the flow is testable in-browser.
-// Swap for the real production duration (e.g. hours, in seconds) before shipping.
-const MINING_DURATION_SECONDS = 180;
-const MINING_REWARD_PTS = 4000;
-const RATE_PER_SEC = MINING_REWARD_PTS / MINING_DURATION_SECONDS;
+function requireAd(label, callback){
+  adLabel.textContent = label;
+  adOverlay.classList.add('show');
+  let remaining = CONFIG.AD_DURATION_SECONDS;
+  adCountdown.textContent = remaining;
+  adTimerText.textContent = '00:' + String(remaining).padStart(2,'0');
 
-const LEVELS = [0, 20000, 60000, 150000, 350000, 800000];
-
-let holdingWallet = 128450; // claimed PTS
-let poolWallet = 0;          // unclaimed PTS accrued during current session
-let tonBalance = 0.0043;
-let walletConnected = false;
-const earningsHistory = [];
-
-function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
-function fmt4(n){ return n.toFixed(4); }
-function fmtTon(n){ return n.toFixed(5).replace(/0+$/,'').replace(/\.$/,'') || '0'; }
-function fmtRp(n){ return 'Rp ' + Math.round(n).toLocaleString('en-US'); }
-
-/* ---------------------------------------------------------
-   GENERIC AD GATE — every reward-producing action (task claim,
-   mining start, mining claim, and any future action) routes
-   through requireAd() so nothing pays out without a full,
-   non-skippable ad view first.
---------------------------------------------------------- */
-let adGateOpen = false;
-let adGateCallback = null;
-
-function requireAd(label, onComplete){
-  if(adGateOpen) return;
-  adGateOpen = true;
-  adGateCallback = onComplete;
-  document.getElementById('pendingMissionName').textContent = label;
-  const overlay = document.getElementById('overlay');
-  overlay.classList.add('show');
-  if(window.Telegram && window.Telegram.WebApp){
-    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-  }
-  let t = 15;
-  const cd = document.getElementById('countdown');
-  cd.textContent = t;
-  const timer = setInterval(()=>{
-    t--;
-    cd.textContent = t;
-    if(t <= 0){
-      clearInterval(timer);
-      overlay.classList.remove('show');
-      adGateOpen = false;
-      const cb = adGateCallback;
-      adGateCallback = null;
-      if(cb) cb();
+  clearInterval(adInterval);
+  adInterval = setInterval(() => {
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(adInterval);
+      adOverlay.classList.remove('show');
+      callback();
+      return;
     }
+    adCountdown.textContent = remaining;
+    adTimerText.textContent = '00:' + String(remaining).padStart(2,'0');
   }, 1000);
 }
 
-function showToast(pts, tonAmt){
-  const toast = document.getElementById('toast');
-  let text = '+' + fmt(pts) + ' PTS';
-  if(tonAmt) text += '  ·  +' + tonAmt.toFixed(5) + ' TON';
-  document.getElementById('toastReward').textContent = text;
-  toast.classList.add('show');
-  if(window.Telegram && window.Telegram.WebApp){
-    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-  }
-  setTimeout(()=> toast.classList.remove('show'), 1800);
+/* ==================================================================
+   TAP WINDOW — 3x tap / rolling 24 jam dari tap pertama
+   ================================================================== */
+function pruneTapWindow(){
+  const now = Date.now();
+  state.tapTimestamps = state.tapTimestamps.filter(t => (now - t) < CONFIG.WINDOW_SECONDS * 1000);
+}
+function tapsRemaining(){
+  pruneTapWindow();
+  return CONFIG.MAX_TAPS_PER_WINDOW - state.tapTimestamps.length;
+}
+function nextTapUnlockAt(){
+  pruneTapWindow();
+  if(state.tapTimestamps.length === 0) return null;
+  const oldest = Math.min(...state.tapTimestamps);
+  return oldest + CONFIG.WINDOW_SECONDS * 1000;
 }
 
-function creditTon(title, amount){
-  tonBalance += amount;
-  earningsHistory.push({ title, amount, time: 'just now' });
-  updateWallet();
+/* ==================================================================
+   MINING FLOW
+   ================================================================== */
+function isMining(){
+  return state.miningEndAt !== null && Date.now() < state.miningEndAt;
+}
+function isReadyToClaim(){
+  return state.miningEndAt !== null && Date.now() >= state.miningEndAt;
 }
 
-/* ---------------------------------------------------------
-   HEADER: level, status, assets, wallets, gain, coin
---------------------------------------------------------- */
-function currentLevel(){
-  let lvl = 1, next = LEVELS[1];
-  for(let i=1;i<LEVELS.length;i++){
-    if(holdingWallet >= LEVELS[i]) lvl = i+1; else { next = LEVELS[i]; break; }
-    next = null;
-  }
-  return { lvl, next };
-}
+function startMiningTap(){
+  if(isMining() || isReadyToClaim()) return;
+  if(tapsRemaining() <= 0) return;
 
-function renderHeader(){
-  const { lvl, next } = currentLevel();
-  document.getElementById('lvlPill').textContent = 'Lvl ' + lvl;
-  document.getElementById('lvlNote').textContent = (next === null)
-    ? 'Max level reached'
-    : fmt(Math.max(0, next - holdingWallet)) + ' PTS to next level';
-
-  document.getElementById('holdingNum').textContent = fmt(holdingWallet);
-  document.getElementById('poolNum').textContent = fmt4(poolWallet);
-  document.getElementById('assetsNum').textContent = fmt4(holdingWallet + poolWallet);
-
-  const gain = document.getElementById('gainPill');
-  gain.textContent = '+' + (miningState === 'mining' ? RATE_PER_SEC.toFixed(4) : '0.0000');
-}
-
-document.getElementById('mascotHelp').addEventListener('click', ()=>{
-  const toast = document.getElementById('toast');
-  document.getElementById('toastReward').textContent = 'Tasks tab has your daily missions 🐶';
-  toast.classList.add('show');
-  setTimeout(()=> toast.classList.remove('show'), 1800);
-});
-
-/* ---------------------------------------------------------
-   WALLET / PROFILE TAB
---------------------------------------------------------- */
-function updateWallet(){
-  document.getElementById('tonBalance').textContent = tonBalance.toFixed(4);
-  const fiat = tonBalance * TON_PRICE_USD * USD_IDR;
-  document.getElementById('tonFiat').textContent = '≈ ' + fmtRp(fiat) + ' at current rate';
-
-  const pct = Math.min(100, (tonBalance / MIN_WITHDRAW) * 100);
-  document.getElementById('progressPct').textContent = Math.round(pct) + '%';
-  document.getElementById('progressFill').style.width = pct + '%';
-
-  const cta = document.getElementById('walletCta');
-  if(tonBalance >= MIN_WITHDRAW){
-    cta.textContent = 'Minimum reached — eligible for the next payout cycle';
-    cta.classList.add('ready');
-  } else {
-    const remaining = (MIN_WITHDRAW - tonBalance).toFixed(4);
-    cta.textContent = remaining + ' TON to go · min. withdrawal ' + MIN_WITHDRAW + ' TON';
-    cta.classList.remove('ready');
-  }
-  renderHistory();
-}
-
-function renderHistory(){
-  const el = document.getElementById('history');
-  el.innerHTML = '';
-  if(earningsHistory.length === 0){
-    el.innerHTML = '<div class="info-box" style="margin:0;">No ad earnings yet today — complete a task or mining session to see it here.</div>';
-    return;
-  }
-  earningsHistory.slice().reverse().forEach(h=>{
-    const row = document.createElement('div');
-    row.className = 'h-row';
-    row.innerHTML = `
-      <div class="h-left">
-        <div class="h-icon">📺</div>
-        <div><div class="h-title">${h.title}</div><div class="h-sub">${h.time}</div></div>
-      </div>
-      <div class="h-amt">+${fmtTon(h.amount)} TON</div>
-    `;
-    el.appendChild(row);
+  requireAd('Mulai sesi mining 8 jam', () => {
+    const now = Date.now();
+    state.tapTimestamps.push(now);
+    state.miningEndAt = now + CONFIG.SESSION_DURATION_SECONDS * 1000;
+    persistAll();
+    render();
   });
 }
 
-/* ---------------------------------------------------------
-   NAV
---------------------------------------------------------- */
-document.querySelectorAll('.navitem').forEach(item=>{
-  item.addEventListener('click', ()=>{
-    document.querySelectorAll('.navitem').forEach(i=>i.classList.remove('active'));
-    item.classList.add('active');
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.getElementById(item.dataset.view).classList.add('active');
-    window.scrollTo(0,0);
+function claimMining(){
+  if(!isReadyToClaim()) return;
+  requireAd('Klaim reward mining', () => {
+    state.pool += CONFIG.SESSION_REWARD_PTS;
+    state.holding += state.pool;
+    state.pool = 0;
+    state.miningEndAt = null;
+    markTodayDone();
+    persistAll();
+    showToast('+' + CONFIG.SESSION_REWARD_PTS.toLocaleString('id-ID') + ' PTS');
+    render();
   });
-});
-
-/* ---------------------------------------------------------
-   STREAK CALENDAR
---------------------------------------------------------- */
-const daysShort = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const daysEl = document.getElementById('days');
-daysShort.forEach((d,i)=>{
-  const done = i < 5;
-  const isToday = i === 4;
-  const div = document.createElement('div');
-  div.className = 'day' + (done ? ' done' : '') + (isToday ? ' today' : '');
-  div.innerHTML = `<div>${d}</div><div class="dot"></div>`;
-  daysEl.appendChild(div);
-});
-
-/* ---------------------------------------------------------
-   MINING: idle -> (ad) -> mining -> ready -> (ad) -> idle (+reward)
---------------------------------------------------------- */
-let miningState = 'idle'; // idle | mining | ready
-let miningTimer = null;
-let miningEnd = 0;
-
-function setMiningUI(){
-  const btn = document.getElementById('mineBtn');
-  const pill = document.getElementById('statusPill');
-  const text = document.getElementById('statusText');
-  const coin = document.getElementById('coin');
-  btn.classList.remove('mining','ready');
-  pill.classList.remove('mining','ready');
-  coin.classList.remove('spin');
-
-  if(miningState === 'idle'){
-    text.textContent = 'IDLE';
-    btn.textContent = 'START';
-  } else if(miningState === 'mining'){
-    text.textContent = 'MINING';
-    pill.classList.add('mining');
-    btn.textContent = 'MINING…';
-    btn.classList.add('mining');
-    coin.classList.add('spin');
-  } else if(miningState === 'ready'){
-    text.textContent = 'READY';
-    pill.classList.add('ready');
-    btn.textContent = 'CLAIM';
-    btn.classList.add('ready');
-  }
-  renderHeader();
 }
 
-function tickMining(){
-  const total = MINING_DURATION_SECONDS * 1000;
-  const remaining = Math.max(0, miningEnd - Date.now());
-  poolWallet = Math.min(MINING_REWARD_PTS, ((total - remaining) / 1000) * RATE_PER_SEC);
-  renderHeader();
-  if(remaining <= 0){
-    clearInterval(miningTimer);
-    poolWallet = MINING_REWARD_PTS;
-    miningState = 'ready';
-    setMiningUI();
+/* ==================================================================
+   KALENDER STREAK
+   ================================================================== */
+const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const DOW_ID = ['M','S','S','R','K','J','S'];
+
+function dateKey(d){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function markTodayDone(){
+  const key = dateKey(new Date());
+  if(!state.calendarDone[key]){
+    state.calendarDone[key] = true;
+    state.streak += 1;
+  }
+}
+function renderCalendar(){
+  const wrap = document.getElementById('calDays');
+  wrap.innerHTML = '';
+  const today = new Date();
+  document.getElementById('calMonth').textContent = MONTHS_ID[today.getMonth()] + ' ' + today.getFullYear();
+
+  // tampilkan 7 hari: 6 hari lalu -> hari ini
+  for(let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(today.getDate() - i);
+    const key = dateKey(d);
+    const isToday = i === 0;
+    const done = !!state.calendarDone[key];
+
+    const el = document.createElement('div');
+    el.className = 'day' + (done ? ' done' : '') + (isToday ? ' today' : '');
+    el.innerHTML = '<div>' + DOW_ID[d.getDay()] + '</div><div>' + d.getDate() + '</div>';
+    wrap.appendChild(el);
   }
 }
 
-document.getElementById('mineBtn').addEventListener('click', ()=>{
-  if(miningState === 'idle'){
-    requireAd('Mining Session', ()=>{
-      miningState = 'mining';
-      miningEnd = Date.now() + MINING_DURATION_SECONDS * 1000;
-      setMiningUI();
-      miningTimer = setInterval(tickMining, 250);
-    });
-  } else if(miningState === 'ready'){
-    requireAd('Claim Mining Reward', ()=>{
-      holdingWallet += poolWallet;
-      poolWallet = 0;
-      creditTon('Mining Claim', TON_PER_AD);
-      showToast(MINING_REWARD_PTS, TON_PER_AD);
-      miningState = 'idle';
-      setMiningUI();
-    });
-  }
-});
-
-/* ---------------------------------------------------------
-   TASKS
---------------------------------------------------------- */
-const missionsData = [
-  { icon:"📅", title:"Daily Claim", sub:"Open the app today", reward:500, state:"done" },
-  { icon:"📢", title:"Subscribe Partner Channel", sub:"@partnerchannel", reward:1500, state:"unlocked" },
-  { icon:"🔁", title:"Try Sponsor App", sub:"Open DeFi X mini app", reward:2000, state:"locked" },
-  { icon:"💧", title:"Testnet Swap", sub:"Small swap on DEX Y", reward:3000, state:"locked" },
-  { icon:"🗳️", title:"Community Vote", sub:"Fill out 1 quick poll", reward:1000, state:"locked" },
-  { icon:"⭐", title:"Weekly Streak Bonus", sub:"Complete 5 tasks this week", reward:5000, state:"locked" },
+/* ==================================================================
+   TUGAS HARIAN (contoh) — reward wajib lewat requireAd juga
+   ================================================================== */
+const MISSIONS = [
+  { id:'join_channel', title:'Join Channel Telegram', reward:5000, icon:'📢' },
+  { id:'connect_wallet_info', title:'Pelajari cara kerja Pool Wallet', reward:2500, icon:'📘' },
+  { id:'invite_friend', title:'Ajak 1 teman (segera hadir)', reward:10000, icon:'👥', locked:true }
 ];
 
-const missionsEl = document.getElementById('missions');
-
-function renderMissions(){
-  missionsEl.innerHTML = '';
-  let doneCount = 0;
-  missionsData.forEach((m, idx)=>{
-    if(m.state === 'done') doneCount++;
-    const row = document.createElement('div');
-    row.className = 'mission ' + (m.state === 'locked' ? 'locked' : '') + (m.state === 'done' ? 'completed' : '');
-    let stateHtml = '';
-    if(m.state === 'done') stateHtml = `<div class="m-state done">✓</div>`;
-    else if(m.state === 'unlocked') stateHtml = `<div class="m-state go">▶</div>`;
-    else stateHtml = `<div class="m-state">🔒</div>`;
-
-    row.innerHTML = `
-      <div class="m-icon">${m.icon}</div>
-      <div class="m-body"><div class="m-title">${m.title}</div><div class="m-sub">${m.sub}</div></div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-        <div class="m-reward">+${fmt(m.reward)}</div>
-        ${stateHtml}
-      </div>
-    `;
-    if(m.state === 'unlocked'){
-      row.addEventListener('click', ()=> requireAd(m.title, ()=> completeMission(idx)));
-    }
-    missionsEl.appendChild(row);
+function claimMission(missionId){
+  const m = MISSIONS.find(x => x.id === missionId);
+  if(!m || m.locked || state.missionsDone[missionId]) return;
+  requireAd('Klaim reward: ' + m.title, () => {
+    state.holding += m.reward;
+    state.missionsDone[missionId] = true;
+    persistAll();
+    showToast('+' + m.reward.toLocaleString('id-ID') + ' PTS');
+    render();
   });
-  document.getElementById('missionCount').textContent = doneCount + '/' + missionsData.length;
 }
 
-function completeMission(idx){
-  const m = missionsData[idx];
-  m.state = 'done';
-  holdingWallet += m.reward;
-  creditTon(m.title, TON_PER_AD);
-  showToast(m.reward, TON_PER_AD);
-  renderHeader();
+function renderMissions(targetId){
+  const wrap = document.getElementById(targetId);
+  wrap.innerHTML = '';
+  let doneCount = 0;
+  MISSIONS.forEach(m => {
+    const done = !!state.missionsDone[m.id];
+    if(done) doneCount++;
+    const el = document.createElement('div');
+    el.className = 'mission' + (m.locked ? ' locked' : '') + (done ? ' completed' : '');
+    el.innerHTML = `
+      <div class="m-icon">${m.icon}</div>
+      <div class="m-body">
+        <div class="m-title">${m.title}</div>
+        <div class="m-sub">Reward tugas harian</div>
+      </div>
+      <div class="m-reward">+${m.reward.toLocaleString('id-ID')}</div>
+      <div class="m-state ${done ? 'done' : (m.locked ? '' : 'go')}">${done ? '✓' : (m.locked ? '🔒' : '›')}</div>
+    `;
+    if(!m.locked && !done){
+      el.addEventListener('click', () => claimMission(m.id));
+    }
+    wrap.appendChild(el);
+  });
+  const countLabel = document.getElementById('taskCountLabel');
+  if(countLabel) countLabel.textContent = doneCount + '/' + MISSIONS.length;
+}
 
-  const next = missionsData.findIndex(mm => mm.state === 'locked');
-  if(next !== -1){
-    setTimeout(()=>{ missionsData[next].state = 'unlocked'; renderMissions(); }, 900);
+/* ==================================================================
+   RENDER UTAMA
+   ================================================================== */
+const mineBtn = document.getElementById('mineBtn');
+const coinEl = document.getElementById('coinEl');
+const statusPill = document.getElementById('statusPill');
+const statusText = document.getElementById('statusText');
+const gainPill = document.getElementById('gainPill');
+
+function render(){
+  pruneTapWindow();
+
+  document.getElementById('holdingNum').textContent = Math.floor(state.holding).toLocaleString('id-ID');
+  document.getElementById('poolNum').textContent = Math.floor(state.pool).toLocaleString('id-ID');
+  document.getElementById('assetsNum').textContent = Math.floor(state.holding + state.pool).toLocaleString('id-ID');
+  document.getElementById('streakTop').textContent = state.streak;
+  document.getElementById('lvlPill').textContent = 'Lvl ' + state.level;
+  document.getElementById('profileHolding').textContent = Math.floor(state.holding).toLocaleString('id-ID');
+  document.getElementById('profileLevel').textContent = state.level;
+  document.getElementById('profileStreak').textContent = state.streak + ' hari';
+  document.getElementById('tapNote').textContent = (CONFIG.MAX_TAPS_PER_WINDOW - tapsRemaining()) + '/' + CONFIG.MAX_TAPS_PER_WINDOW;
+
+  if(isMining()){
+    statusPill.className = 'idle-pill mining';
+    statusText.textContent = 'MINING';
+    coinEl.classList.add('spin');
+    mineBtn.className = 'mine-btn mining';
+    mineBtn.textContent = 'MINING… ' + formatCountdown(state.miningEndAt - Date.now());
+
+    const elapsed = CONFIG.SESSION_DURATION_SECONDS * 1000 - (state.miningEndAt - Date.now());
+    const liveGain = (elapsed / 1000) * (CONFIG.SESSION_REWARD_PTS / CONFIG.SESSION_DURATION_SECONDS);
+    document.getElementById('poolNum').textContent = Math.floor(liveGain).toLocaleString('id-ID');
+    document.getElementById('assetsNum').textContent = Math.floor(state.holding + liveGain).toLocaleString('id-ID');
+
+    gainPill.style.display = 'block';
+    gainPill.textContent = '+' + (CONFIG.SESSION_REWARD_PTS / CONFIG.SESSION_DURATION_SECONDS).toFixed(4) + '/detik';
+
+  } else if(isReadyToClaim()){
+    statusPill.className = 'idle-pill ready';
+    statusText.textContent = 'READY';
+    coinEl.classList.remove('spin');
+    mineBtn.className = 'mine-btn ready';
+    mineBtn.textContent = 'CLAIM ' + CONFIG.SESSION_REWARD_PTS.toLocaleString('id-ID') + ' PTS';
+    gainPill.style.display = 'none';
+
+  } else {
+    statusPill.className = 'idle-pill';
+    statusText.textContent = 'IDLE';
+    coinEl.classList.remove('spin');
+    gainPill.style.display = 'none';
+
+    const remaining = tapsRemaining();
+    if(remaining > 0){
+      mineBtn.className = 'mine-btn';
+      mineBtn.textContent = 'START MINING';
+    } else {
+      mineBtn.className = 'mine-btn locked';
+      const unlockAt = nextTapUnlockAt();
+      mineBtn.textContent = unlockAt ? 'SESI HABIS · buka lagi ' + formatCountdown(unlockAt - Date.now()) : 'SESI HABIS';
+    }
   }
-  renderMissions();
+
+  renderCalendar();
+  renderMissions('missionList');
+  renderMissions('missionListFull');
 }
 
-setMiningUI();
-renderMissions();
-updateWallet();
+function formatCountdown(ms){
+  if(ms < 0) ms = 0;
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function showToast(text){
+  const toast = document.getElementById('toast');
+  document.getElementById('toastNum').textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ==================================================================
+   NAVIGASI TAB
+   ================================================================== */
+document.querySelectorAll('.navitem').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.navitem').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  });
+});
+
+mineBtn.addEventListener('click', () => {
+  if(isReadyToClaim()) claimMining();
+  else if(!isMining()) startMiningTap();
+});
+
+/* ==================================================================
+   LOOP
+   ================================================================== */
+render();
+setInterval(render, 1000);
+
+if(window.Telegram && window.Telegram.WebApp){
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+}
 </script>
 
 </body>

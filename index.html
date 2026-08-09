@@ -2,8 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>DailyCalendar — Prototype</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -24,14 +25,25 @@
     --radius: 16px;
   }
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin:0; padding:0; background:#000; }
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  html{ background:#0A0D12; overscroll-behavior:none; height:100%; }
   body{
+    margin:0; padding:0;
     font-family:'Inter', sans-serif;
     color: var(--text);
+    background:#0A0D12;
     display:flex; justify-content:center;
     min-height:100vh;
+    overscroll-behavior:none;
+    touch-action: pan-y;
   }
+  button, .mission, .navitem, .m-state{ touch-action: manipulation; }
 
   .phone{
     width:100%; max-width:420px;
@@ -338,10 +350,17 @@
     </div>
   </div>
 
+  <div class="view" id="viewInvite">
+    <div class="section-label"><h2>Invite Friends</h2></div>
+    <div class="info-box" style="margin:0 18px;">
+      Referral rewards are coming soon. When it launches, inviting friends will earn you bonus Airdrop Points — details will appear here first.
+    </div>
+  </div>
+
   <div class="navbar">
     <div class="navitem active" data-view="viewHome"><div class="ic">🏠</div>Home</div>
-    <div class="navitem" data-view="viewHome"><div class="ic">🎯</div>Missions</div>
-    <div class="navitem" data-view="viewHome"><div class="ic">👥</div>Invite</div>
+    <div class="navitem" data-view="viewHome" data-scroll="missions"><div class="ic">🎯</div>Missions</div>
+    <div class="navitem" data-view="viewInvite"><div class="ic">👥</div>Invite</div>
     <div class="navitem" data-view="viewWallet"><div class="ic">💼</div>Wallet</div>
   </div>
 
@@ -368,6 +387,15 @@
 </div>
 
 <script>
+if(window.Telegram && window.Telegram.WebApp){
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor('#0A0D12'); } catch(e){}
+  try { tg.setBackgroundColor('#0A0D12'); } catch(e){}
+  try { tg.disableVerticalSwipes(); } catch(e){}
+}
+
 const missionsData = [
   { icon:"📅", title:"Daily Claim", sub:"Open the app today", reward:500, state:"done" },
   { icon:"📢", title:"Subscribe Partner Channel", sub:"@partnerchannel", reward:1500, state:"unlocked" },
@@ -442,6 +470,12 @@ document.querySelectorAll('.navitem').forEach(item=>{
     const target = item.dataset.view;
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById(target).classList.add('active');
+    if(item.dataset.scroll){
+      const el = document.getElementById(item.dataset.scroll);
+      if(el) setTimeout(()=> el.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+    } else {
+      window.scrollTo(0,0);
+    }
   });
 });
 
@@ -492,11 +526,18 @@ function render(){
   document.getElementById('missionCount').textContent = doneCount + '/' + missionsData.length;
 }
 
+let adGateOpen = false;
+
 function startAdGate(idx){
+  if(adGateOpen) return;
+  adGateOpen = true;
   pendingIndex = idx;
   document.getElementById('pendingMissionName').textContent = missionsData[idx].title;
   const overlay = document.getElementById('overlay');
   overlay.classList.add('show');
+  if(window.Telegram && window.Telegram.WebApp){
+    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+  }
   let t = 15;
   const cd = document.getElementById('countdown');
   cd.textContent = t;
@@ -506,9 +547,10 @@ function startAdGate(idx){
     if(t <= 0){
       clearInterval(timer);
       overlay.classList.remove('show');
+      adGateOpen = false;
       completeMission(pendingIndex);
     }
-  }, 200);
+  }, 1000);
 }
 
 function completeMission(idx){
@@ -521,6 +563,10 @@ function completeMission(idx){
   tonBalance += TON_PER_AD;
   earningsHistory.push({ title: m.title, amount: TON_PER_AD, time: 'just now' });
   updateWallet();
+
+  if(window.Telegram && window.Telegram.WebApp){
+    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+  }
 
   const toast = document.getElementById('toast');
   document.getElementById('toastReward').textContent = '+' + fmt(m.reward) + ' PTS  ·  +' + TON_PER_AD.toFixed(5) + ' TON';
